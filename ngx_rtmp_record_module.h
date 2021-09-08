@@ -63,19 +63,15 @@ typedef struct {
 } ngx_rtmp_record_ctx_t;
 
 
-ngx_uint_t ngx_rtmp_record_find(ngx_rtmp_record_app_conf_t *racf,
-           ngx_str_t *id);
+ngx_uint_t ngx_rtmp_record_find(ngx_rtmp_record_app_conf_t *racf, ngx_str_t *id);
 
 
 /* Manual recording control,
  * 'n' is record node index in config array.
  * Note: these functions allocate path in static buffer */
 
-ngx_int_t ngx_rtmp_record_open(ngx_rtmp_session_t *s, ngx_uint_t n,
-          ngx_str_t *path);
-ngx_int_t ngx_rtmp_record_close(ngx_rtmp_session_t *s, ngx_uint_t n,
-          ngx_str_t *path);
-
+ngx_int_t ngx_rtmp_record_open(ngx_rtmp_session_t *s, ngx_uint_t n, ngx_str_t *path);
+ngx_int_t ngx_rtmp_record_close(ngx_rtmp_session_t *s, ngx_uint_t n, ngx_str_t *path);
 
 typedef struct {
     ngx_str_t                           recorder;
@@ -83,14 +79,10 @@ typedef struct {
 } ngx_rtmp_record_done_t;
 
 
-typedef ngx_int_t (*ngx_rtmp_record_done_pt)(ngx_rtmp_session_t *s,
-        ngx_rtmp_record_done_t *v);
-
+typedef ngx_int_t (*ngx_rtmp_record_done_pt)(ngx_rtmp_session_t *s, ngx_rtmp_record_done_t *v);
 
 extern ngx_rtmp_record_done_pt          ngx_rtmp_record_done;
 
-
 extern ngx_module_t                     ngx_rtmp_record_module;
-
 
 #endif /* _NGX_RTMP_RECORD_H_INCLUDED_ */

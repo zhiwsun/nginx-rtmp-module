@@ -16,23 +16,17 @@ static ngx_rtmp_play_pt     next_play;
 static ngx_int_t ngx_rtmp_log_postconfiguration(ngx_conf_t *cf);
 static void *ngx_rtmp_log_create_main_conf(ngx_conf_t *cf);
 static void * ngx_rtmp_log_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_log_merge_app_conf(ngx_conf_t *cf,
-       void *parent, void *child);
-static char * ngx_rtmp_log_set_log(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
-static char * ngx_rtmp_log_set_format(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
-static char * ngx_rtmp_log_compile_format(ngx_conf_t *cf, ngx_array_t *ops,
-       ngx_array_t *args, ngx_uint_t s);
+static char * ngx_rtmp_log_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
+static char * ngx_rtmp_log_set_log(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char * ngx_rtmp_log_set_format(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char * ngx_rtmp_log_compile_format(ngx_conf_t *cf, ngx_array_t *ops, ngx_array_t *args, ngx_uint_t s);
 
 
 typedef struct ngx_rtmp_log_op_s ngx_rtmp_log_op_t;
 
 
-typedef size_t (*ngx_rtmp_log_op_getlen_pt)(ngx_rtmp_session_t *s,
-        ngx_rtmp_log_op_t *op);
-typedef u_char * (*ngx_rtmp_log_op_getdata_pt)(ngx_rtmp_session_t *s,
-        u_char *buf, ngx_rtmp_log_op_t *log);
+typedef size_t (*ngx_rtmp_log_op_getlen_pt)(ngx_rtmp_session_t *s, ngx_rtmp_log_op_t *op);
+typedef u_char * (*ngx_rtmp_log_op_getdata_pt)(ngx_rtmp_session_t *s, u_char *buf, ngx_rtmp_log_op_t *log);
 
 
 struct ngx_rtmp_log_op_s {
@@ -204,7 +198,7 @@ ngx_rtmp_log_var_msec_getdata(ngx_rtmp_session_t *s, u_char *buf,
     ngx_time_t  *tp;
 
     tp = ngx_timeofday();
-    
+
     return ngx_sprintf(buf, "%T.%03M", tp->sec, tp->msec);
 }
 
@@ -292,39 +286,32 @@ ngx_rtmp_log_var_context_cstring_getdata(ngx_rtmp_session_t *s, u_char *buf,
 
 
 static size_t
-ngx_rtmp_log_var_session_uint32_getlen(ngx_rtmp_session_t *s,
-    ngx_rtmp_log_op_t *op)
+ngx_rtmp_log_var_session_uint32_getlen(ngx_rtmp_session_t *s, ngx_rtmp_log_op_t *op)
 {
     return NGX_INT32_LEN;
 }
 
 
 static u_char *
-ngx_rtmp_log_var_session_uint32_getdata(ngx_rtmp_session_t *s, u_char *buf,
-    ngx_rtmp_log_op_t *op)
+ngx_rtmp_log_var_session_uint32_getdata(ngx_rtmp_session_t *s, u_char *buf, ngx_rtmp_log_op_t *op)
 {
     uint32_t   *v;
-
     v = (uint32_t *) ((uint8_t *) s + op->offset);
-
     return ngx_sprintf(buf, "%uD", *v);
 }
 
 
 static size_t
-ngx_rtmp_log_var_time_local_getlen(ngx_rtmp_session_t *s,
-    ngx_rtmp_log_op_t *op)
+ngx_rtmp_log_var_time_local_getlen(ngx_rtmp_session_t *s, ngx_rtmp_log_op_t *op)
 {
     return ngx_cached_http_log_time.len;
 }
 
 
 static u_char *
-ngx_rtmp_log_var_time_local_getdata(ngx_rtmp_session_t *s, u_char *buf,
-    ngx_rtmp_log_op_t *op)
+ngx_rtmp_log_var_time_local_getdata(ngx_rtmp_session_t *s, u_char *buf, ngx_rtmp_log_op_t *op)
 {
-    return ngx_cpymem(buf, ngx_cached_http_log_time.data,
-                      ngx_cached_http_log_time.len);
+    return ngx_cpymem(buf, ngx_cached_http_log_time.data, ngx_cached_http_log_time.len);
 }
 
 
@@ -337,25 +324,21 @@ ngx_rtmp_log_var_session_time_getlen(ngx_rtmp_session_t *s,
 
 
 static u_char *
-ngx_rtmp_log_var_session_time_getdata(ngx_rtmp_session_t *s, u_char *buf,
-    ngx_rtmp_log_op_t *op)
+ngx_rtmp_log_var_session_time_getdata(ngx_rtmp_session_t *s, u_char *buf, ngx_rtmp_log_op_t *op)
 {
-    return ngx_sprintf(buf, "%L",
-                       (int64_t) (ngx_current_msec - s->epoch) / 1000);
+    return ngx_sprintf(buf, "%L", (int64_t) (ngx_current_msec - s->epoch) / 1000);
 }
 
 
 static size_t
-ngx_rtmp_log_var_session_readable_time_getlen(ngx_rtmp_session_t *s,
-    ngx_rtmp_log_op_t *op)
+ngx_rtmp_log_var_session_readable_time_getlen(ngx_rtmp_session_t *s, ngx_rtmp_log_op_t *op)
 {
     return NGX_INT_T_LEN + sizeof("d 23h 59m 59s") - 1;
 }
 
 
 static u_char *
-ngx_rtmp_log_var_session_readable_time_getdata(ngx_rtmp_session_t *s,
-    u_char *buf, ngx_rtmp_log_op_t *op)
+ngx_rtmp_log_var_session_readable_time_getdata(ngx_rtmp_session_t *s, u_char *buf, ngx_rtmp_log_op_t *op)
 {
     int64_t     v;
     ngx_uint_t  days, hours, minutes, seconds;

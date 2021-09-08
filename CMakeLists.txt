@@ -3,6 +3,10 @@ project(nginx_rtmp_module C)
 
 set(CMAKE_C_STANDARD 11)
 
+include_directories("../nginx/src/core")
+include_directories("../nginx/src/event")
+include_directories("../nginx/src/http")
+include_directories("../nginx/src/stream")
 include_directories(.)
 include_directories(dash)
 include_directories(hls)
