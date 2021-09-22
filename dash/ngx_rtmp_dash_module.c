@@ -16,8 +16,7 @@ static ngx_rtmp_stream_eof_pt           next_stream_eof;
 
 static ngx_int_t ngx_rtmp_dash_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_dash_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_dash_merge_app_conf(ngx_conf_t *cf,
-       void *parent, void *child);
+static char * ngx_rtmp_dash_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_rtmp_dash_write_init_segments(ngx_rtmp_session_t *s);
 
 

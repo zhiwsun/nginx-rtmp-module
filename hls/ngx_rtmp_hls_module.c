@@ -18,15 +18,12 @@ static ngx_rtmp_stream_begin_pt         next_stream_begin;
 static ngx_rtmp_stream_eof_pt           next_stream_eof;
 
 
-static char * ngx_rtmp_hls_variant(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
+static char * ngx_rtmp_hls_variant(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_rtmp_hls_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_hls_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_hls_merge_app_conf(ngx_conf_t *cf,
-       void *parent, void *child);
+static char * ngx_rtmp_hls_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_rtmp_hls_flush_audio(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s,
-       ngx_str_t *path);
+static ngx_int_t ngx_rtmp_hls_ensure_directory(ngx_rtmp_session_t *s, ngx_str_t *path);
 
 
 #define NGX_RTMP_HLS_BUFSIZE            (1024*1024)

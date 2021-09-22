@@ -12,23 +12,16 @@
 
 
 static char *ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-static ngx_int_t ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
-    ngx_rtmp_listen_t *listen);
+static ngx_int_t ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports, ngx_rtmp_listen_t *listen);
 static char *ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports);
-static ngx_int_t ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport,
-    ngx_rtmp_conf_addr_t *addr);
+static ngx_int_t ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t *addr);
 #if (NGX_HAVE_INET6)
-static ngx_int_t ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport,
-    ngx_rtmp_conf_addr_t *addr);
+static ngx_int_t ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t *addr);
 #endif
 static ngx_int_t ngx_rtmp_cmp_conf_addrs(const void *one, const void *two);
-static ngx_int_t ngx_rtmp_init_events(ngx_conf_t *cf,
-        ngx_rtmp_core_main_conf_t *cmcf);
-static ngx_int_t ngx_rtmp_init_event_handlers(ngx_conf_t *cf,
-        ngx_rtmp_core_main_conf_t *cmcf);
-static char * ngx_rtmp_merge_applications(ngx_conf_t *cf,
-        ngx_array_t *applications, void **app_conf, ngx_rtmp_module_t *module,
-        ngx_uint_t ctx_index);
+static ngx_int_t ngx_rtmp_init_events(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf);
+static ngx_int_t ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf);
+static char * ngx_rtmp_merge_applications(ngx_conf_t *cf, ngx_array_t *applications, void **app_conf, ngx_rtmp_module_t *module, ngx_uint_t ctx_index);
 static ngx_int_t ngx_rtmp_init_process(ngx_cycle_t *cycle);
 
 
@@ -123,8 +116,7 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     /* the rtmp main_conf context, it is the same in the all rtmp contexts */
 
-    ctx->main_conf = ngx_pcalloc(cf->pool,
-                                 sizeof(void *) * ngx_rtmp_max_module);
+    ctx->main_conf = ngx_pcalloc(cf->pool, sizeof(void *) * ngx_rtmp_max_module);
     if (ctx->main_conf == NULL) {
         return NGX_CONF_ERROR;
     }
