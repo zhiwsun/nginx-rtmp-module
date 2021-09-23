@@ -14,35 +14,22 @@
 #define NGX_RTMP_CAPABILITIES       31
 
 
-static ngx_int_t ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s,
-       ngx_rtmp_connect_t *v);
+static ngx_int_t ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s, ngx_rtmp_connect_t *v);
 static ngx_int_t ngx_rtmp_cmd_disconnect(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_cmd_create_stream(ngx_rtmp_session_t *s,
-       ngx_rtmp_create_stream_t *v);
-static ngx_int_t ngx_rtmp_cmd_close_stream(ngx_rtmp_session_t *s,
-       ngx_rtmp_close_stream_t *v);
-static ngx_int_t ngx_rtmp_cmd_delete_stream(ngx_rtmp_session_t *s,
-       ngx_rtmp_delete_stream_t *v);
-static ngx_int_t ngx_rtmp_cmd_publish(ngx_rtmp_session_t *s,
-       ngx_rtmp_publish_t *v);
-static ngx_int_t ngx_rtmp_cmd_play(ngx_rtmp_session_t *s,
-       ngx_rtmp_play_t *v);
-static ngx_int_t ngx_rtmp_cmd_seek(ngx_rtmp_session_t *s,
-       ngx_rtmp_seek_t *v);
-static ngx_int_t ngx_rtmp_cmd_pause(ngx_rtmp_session_t *s,
-       ngx_rtmp_pause_t *v);
+static ngx_int_t ngx_rtmp_cmd_create_stream(ngx_rtmp_session_t *s, ngx_rtmp_create_stream_t *v);
+static ngx_int_t ngx_rtmp_cmd_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v);
+static ngx_int_t ngx_rtmp_cmd_delete_stream(ngx_rtmp_session_t *s, ngx_rtmp_delete_stream_t *v);
+static ngx_int_t ngx_rtmp_cmd_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v);
+static ngx_int_t ngx_rtmp_cmd_play(ngx_rtmp_session_t *s, ngx_rtmp_play_t *v);
+static ngx_int_t ngx_rtmp_cmd_seek(ngx_rtmp_session_t *s, ngx_rtmp_seek_t *v);
+static ngx_int_t ngx_rtmp_cmd_pause(ngx_rtmp_session_t *s, ngx_rtmp_pause_t *v);
 
 
-static ngx_int_t ngx_rtmp_cmd_stream_begin(ngx_rtmp_session_t *s,
-       ngx_rtmp_stream_begin_t *v);
-static ngx_int_t ngx_rtmp_cmd_stream_eof(ngx_rtmp_session_t *s,
-       ngx_rtmp_stream_eof_t *v);
-static ngx_int_t ngx_rtmp_cmd_stream_dry(ngx_rtmp_session_t *s,
-       ngx_rtmp_stream_dry_t *v);
-static ngx_int_t ngx_rtmp_cmd_recorded(ngx_rtmp_session_t *s,
-       ngx_rtmp_recorded_t *v);
-static ngx_int_t ngx_rtmp_cmd_set_buflen(ngx_rtmp_session_t *s,
-       ngx_rtmp_set_buflen_t *v);
+static ngx_int_t ngx_rtmp_cmd_stream_begin(ngx_rtmp_session_t *s, ngx_rtmp_stream_begin_t *v);
+static ngx_int_t ngx_rtmp_cmd_stream_eof(ngx_rtmp_session_t *s, ngx_rtmp_stream_eof_t *v);
+static ngx_int_t ngx_rtmp_cmd_stream_dry(ngx_rtmp_session_t *s, ngx_rtmp_stream_dry_t *v);
+static ngx_int_t ngx_rtmp_cmd_recorded(ngx_rtmp_session_t *s, ngx_rtmp_recorded_t *v);
+static ngx_int_t ngx_rtmp_cmd_set_buflen(ngx_rtmp_session_t *s, ngx_rtmp_set_buflen_t *v);
 
 
 ngx_rtmp_connect_pt         ngx_rtmp_connect;
@@ -95,8 +82,7 @@ ngx_module_t  ngx_rtmp_cmd_module = {
 
 
 void
-ngx_rtmp_cmd_fill_args(u_char name[NGX_RTMP_MAX_NAME],
-        u_char args[NGX_RTMP_MAX_ARGS])
+ngx_rtmp_cmd_fill_args(u_char name[NGX_RTMP_MAX_NAME], u_char args[NGX_RTMP_MAX_ARGS])
 {
     u_char      *p;
 
@@ -111,8 +97,7 @@ ngx_rtmp_cmd_fill_args(u_char name[NGX_RTMP_MAX_NAME],
 
 
 static ngx_int_t
-ngx_rtmp_cmd_connect_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-        ngx_chain_t *in)
+ngx_rtmp_cmd_connect_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     size_t                      len;
 
@@ -165,8 +150,7 @@ ngx_rtmp_cmd_connect_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     };
 
     ngx_memzero(&v, sizeof(v));
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
@@ -255,8 +239,7 @@ ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s, ngx_rtmp_connect_t *v)
     };
 
     if (s->connected) {
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                "connect: duplicate connection");
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "connect: duplicate connection");
         return NGX_ERROR;
     }
 
@@ -297,8 +280,7 @@ ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s, ngx_rtmp_connect_t *v)
     /* find application & set app_conf */
     cacfp = cscf->applications.elts;
     for(n = 0; n < cscf->applications.nelts; ++n, ++cacfp) {
-        if ((*cacfp)->name.len == s->app.len &&
-            ngx_strncmp((*cacfp)->name.data, s->app.data, s->app.len) == 0)
+        if ((*cacfp)->name.len == s->app.len && ngx_strncmp((*cacfp)->name.data, s->app.data, s->app.len) == 0)
         {
             /* found app! */
             s->app_conf = (*cacfp)->app_conf;
@@ -307,26 +289,21 @@ ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s, ngx_rtmp_connect_t *v)
     }
 
     if (s->app_conf == NULL) {
-        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                      "connect: application not found: '%V'", &s->app);
+        ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "connect: application not found: '%V'", &s->app);
         return NGX_ERROR;
     }
 
     object_encoding = v->object_encoding;
 
     return ngx_rtmp_send_ack_size(s, cscf->ack_window) != NGX_OK ||
-           ngx_rtmp_send_bandwidth(s, cscf->ack_window,
-                                   NGX_RTMP_LIMIT_DYNAMIC) != NGX_OK ||
+           ngx_rtmp_send_bandwidth(s, cscf->ack_window, NGX_RTMP_LIMIT_DYNAMIC) != NGX_OK ||
            ngx_rtmp_send_chunk_size(s, cscf->chunk_size) != NGX_OK ||
-           ngx_rtmp_send_amf(s, &h, out_elts,
-                             sizeof(out_elts) / sizeof(out_elts[0]))
-           != NGX_OK ? NGX_ERROR : NGX_OK;
+           ngx_rtmp_send_amf(s, &h, out_elts, sizeof(out_elts) / sizeof(out_elts[0])) != NGX_OK ? NGX_ERROR : NGX_OK;
 }
 
 
 static ngx_int_t
-ngx_rtmp_cmd_create_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-                                ngx_chain_t *in)
+ngx_rtmp_cmd_create_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     static ngx_rtmp_create_stream_t     v;
 
@@ -337,8 +314,7 @@ ngx_rtmp_cmd_create_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
           &v.trans, sizeof(v.trans) },
     };
 
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
@@ -384,15 +360,12 @@ ngx_rtmp_cmd_create_stream(ngx_rtmp_session_t *s, ngx_rtmp_create_stream_t *v)
     h.csid = NGX_RTMP_CSID_AMF_INI;
     h.type = NGX_RTMP_MSG_AMF_CMD;
 
-    return ngx_rtmp_send_amf(s, &h, out_elts,
-                             sizeof(out_elts) / sizeof(out_elts[0])) == NGX_OK ?
-           NGX_DONE : NGX_ERROR;
+    return ngx_rtmp_send_amf(s, &h, out_elts, sizeof(out_elts) / sizeof(out_elts[0])) == NGX_OK ? NGX_DONE : NGX_ERROR;
 }
 
 
 static ngx_int_t
-ngx_rtmp_cmd_close_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-                               ngx_chain_t *in)
+ngx_rtmp_cmd_close_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     static ngx_rtmp_close_stream_t     v;
 
@@ -403,8 +376,7 @@ ngx_rtmp_cmd_close_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
           &v.stream, 0 },
     };
 
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                             sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
@@ -423,8 +395,7 @@ ngx_rtmp_cmd_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v)
 
 
 static ngx_int_t
-ngx_rtmp_cmd_delete_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-                                ngx_chain_t *in)
+ngx_rtmp_cmd_delete_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     static ngx_rtmp_delete_stream_t     v;
 
@@ -443,8 +414,7 @@ ngx_rtmp_cmd_delete_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
           &v.stream, 0 },
     };
 
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                             sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
@@ -467,8 +437,7 @@ ngx_rtmp_cmd_delete_stream(ngx_rtmp_session_t *s, ngx_rtmp_delete_stream_t *v)
 
 
 static ngx_int_t
-ngx_rtmp_cmd_publish_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-        ngx_chain_t *in)
+ngx_rtmp_cmd_publish_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     static ngx_rtmp_publish_t       v;
 
@@ -494,8 +463,7 @@ ngx_rtmp_cmd_publish_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     ngx_memzero(&v, sizeof(v));
 
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                             sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
@@ -517,8 +485,7 @@ ngx_rtmp_cmd_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v)
 }
 
 static ngx_int_t
-ngx_rtmp_cmd_play_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-        ngx_chain_t *in)
+ngx_rtmp_cmd_play_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     static ngx_rtmp_play_t          v;
 
@@ -552,8 +519,7 @@ ngx_rtmp_cmd_play_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     ngx_memzero(&v, sizeof(v));
 
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                             sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
@@ -579,8 +545,7 @@ ngx_rtmp_cmd_play(ngx_rtmp_session_t *s, ngx_rtmp_play_t *v)
 
 
 static ngx_int_t
-ngx_rtmp_cmd_play2_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-        ngx_chain_t *in)
+ngx_rtmp_cmd_play2_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     static ngx_rtmp_play_t          v;
     static ngx_rtmp_close_stream_t  vc;
@@ -614,8 +579,7 @@ ngx_rtmp_cmd_play2_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     ngx_memzero(&v, sizeof(v));
 
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                             sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
@@ -642,8 +606,7 @@ ngx_rtmp_cmd_play2_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
 
 static ngx_int_t
-ngx_rtmp_cmd_pause_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-        ngx_chain_t *in)
+ngx_rtmp_cmd_pause_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     static ngx_rtmp_pause_t     v;
 
@@ -668,8 +631,7 @@ ngx_rtmp_cmd_pause_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     ngx_memzero(&v, sizeof(v));
 
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
@@ -690,8 +652,7 @@ ngx_rtmp_cmd_pause(ngx_rtmp_session_t *s, ngx_rtmp_pause_t *v)
 
 
 static ngx_int_t
-ngx_rtmp_cmd_disconnect_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-                        ngx_chain_t *in)
+ngx_rtmp_cmd_disconnect_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "disconnect");
 
@@ -707,8 +668,7 @@ ngx_rtmp_cmd_disconnect(ngx_rtmp_session_t *s)
 
 
 static ngx_int_t
-ngx_rtmp_cmd_seek_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-        ngx_chain_t *in)
+ngx_rtmp_cmd_seek_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     static ngx_rtmp_seek_t         v;
 
@@ -730,14 +690,12 @@ ngx_rtmp_cmd_seek_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     ngx_memzero(&v, sizeof(v));
 
-    if (ngx_rtmp_receive_amf(s, in, in_elts,
-                             sizeof(in_elts) / sizeof(in_elts[0])))
+    if (ngx_rtmp_receive_amf(s, in, in_elts, sizeof(in_elts) / sizeof(in_elts[0])))
     {
         return NGX_ERROR;
     }
 
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                  "seek: offset=%i", (ngx_int_t) v.offset);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "seek: offset=%i", (ngx_int_t) v.offset);
 
     return ngx_rtmp_seek(s, &v);
 }

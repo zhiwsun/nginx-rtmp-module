@@ -106,8 +106,7 @@ ngx_rtmp_amf_get(ngx_rtmp_amf_ctx_t *ctx, void *p, size_t n)
         n -= size;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ctx->log, 0,
-            "AMF read eof (%d)", n);
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, ctx->log, 0, "AMF read eof (%d)", n);
 
     return NGX_DONE;
 }
@@ -170,8 +169,7 @@ ngx_rtmp_amf_put(ngx_rtmp_amf_ctx_t *ctx, void *p, size_t n)
 
 
 static ngx_int_t
-ngx_rtmp_amf_read_object(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts,
-        size_t nelts)
+ngx_rtmp_amf_read_object(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts, size_t nelts)
 {
     uint8_t                 type;
     uint16_t                len;
@@ -227,17 +225,13 @@ ngx_rtmp_amf_read_object(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts,
 
         /* TODO: if we require array to be sorted on name
          * then we could be able to use binary search */
-        for(n = 0; n < nelts
-                && (len != elts[n].name.len
-                    || ngx_strncmp(name, elts[n].name.data, len));
-                ++n);
+        for(n = 0; n < nelts && (len != elts[n].name.len || ngx_strncmp(name, elts[n].name.data, len)); ++n);
 
         if (ngx_rtmp_amf_read(ctx, n < nelts ? &elts[n] : NULL, 1) != NGX_OK)
             return NGX_ERROR;
     }
 
-    if (ngx_rtmp_amf_get(ctx, &type, 1) != NGX_OK
-        || type != NGX_RTMP_AMF_END)
+    if (ngx_rtmp_amf_get(ctx, &type, 1) != NGX_OK || type != NGX_RTMP_AMF_END)
     {
         return NGX_ERROR;
     }
@@ -247,8 +241,7 @@ ngx_rtmp_amf_read_object(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts,
 
 
 static ngx_int_t
-ngx_rtmp_amf_read_array(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts,
-        size_t nelts)
+ngx_rtmp_amf_read_array(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts, size_t nelts)
 {
     uint32_t                len;
     size_t                  n;
@@ -270,8 +263,7 @@ ngx_rtmp_amf_read_array(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts,
 
 
 static ngx_int_t
-ngx_rtmp_amf_read_variant(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts,
-        size_t nelts)
+ngx_rtmp_amf_read_variant(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts, size_t nelts)
 {
     uint8_t                 type;
     ngx_int_t               rc;

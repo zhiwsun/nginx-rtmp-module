@@ -281,8 +281,7 @@ typedef struct {
  *  NGX_OK    - success, may continue
  *  NGX_DONE  - success, input parsed, reply sent; need no
  *      more calls on this event */
-typedef ngx_int_t (*ngx_rtmp_handler_pt)(ngx_rtmp_session_t *s,
-        ngx_rtmp_header_t *h, ngx_chain_t *in);
+typedef ngx_int_t (*ngx_rtmp_handler_pt)(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
 
 
 typedef struct {

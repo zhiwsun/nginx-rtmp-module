@@ -57,6 +57,7 @@ static ngx_core_module_t  ngx_rtmp_module_ctx = {
 };
 
 
+// ZHIWU: nginx_module定义，nginx初始化过程须要这个节点的定义；如果须要挂载在nginx启动过程，则需要在nginx配置编译阶段加入ngx_modules.c中
 ngx_module_t  ngx_rtmp_module = {
     NGX_MODULE_V1,
     &ngx_rtmp_module_ctx,                  /* module context */
@@ -329,8 +330,7 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
 static char *
-ngx_rtmp_merge_applications(ngx_conf_t *cf, ngx_array_t *applications,
-            void **app_conf, ngx_rtmp_module_t *module, ngx_uint_t ctx_index)
+ngx_rtmp_merge_applications(ngx_conf_t *cf, ngx_array_t *applications, void **app_conf, ngx_rtmp_module_t *module, ngx_uint_t ctx_index)
 {
     char                           *rv;
     ngx_rtmp_conf_ctx_t            *ctx, saved;
@@ -350,16 +350,13 @@ ngx_rtmp_merge_applications(ngx_conf_t *cf, ngx_array_t *applications,
 
         ctx->app_conf = (*cacfp)->app_conf;
 
-        rv = module->merge_app_conf(cf, app_conf[ctx_index],
-                (*cacfp)->app_conf[ctx_index]);
+        rv = module->merge_app_conf(cf, app_conf[ctx_index], (*cacfp)->app_conf[ctx_index]);
         if (rv != NGX_CONF_OK) {
             return rv;
         }
 
         cacf = (*cacfp)->app_conf[ngx_rtmp_core_module.ctx_index];
-        rv = ngx_rtmp_merge_applications(cf, &cacf->applications,
-                                         (*cacfp)->app_conf,
-                                         module, ctx_index);
+        rv = ngx_rtmp_merge_applications(cf, &cacf->applications, (*cacfp)->app_conf, module, ctx_index);
         if (rv != NGX_CONF_OK) {
             return rv;
         }
@@ -377,15 +374,13 @@ ngx_rtmp_init_events(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
     size_t                      n;
 
     for(n = 0; n < NGX_RTMP_MAX_EVENT; ++n) {
-        if (ngx_array_init(&cmcf->events[n], cf->pool, 1,
-                sizeof(ngx_rtmp_handler_pt)) != NGX_OK)
+        if (ngx_array_init(&cmcf->events[n], cf->pool, 1, sizeof(ngx_rtmp_handler_pt)) != NGX_OK)
         {
             return NGX_ERROR;
         }
     }
 
-    if (ngx_array_init(&cmcf->amf, cf->pool, 1,
-                sizeof(ngx_rtmp_amf_handler_t)) != NGX_OK)
+    if (ngx_array_init(&cmcf->amf, cf->pool, 1, sizeof(ngx_rtmp_amf_handler_t)) != NGX_OK)
     {
         return NGX_ERROR;
     }
@@ -447,8 +442,7 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
     for(n = 0; n < cmcf->amf.nelts; ++n, ++h) {
         ha = cmcf->amf_arrays.elts;
         for(m = 0; m < cmcf->amf_arrays.nelts; ++m, ++ha) {
-            if (h->name.len == ha->key.len
-                    && !ngx_strncmp(h->name.data, ha->key.data, ha->key.len))
+            if (h->name.len == ha->key.len && !ngx_strncmp(h->name.data, ha->key.data, ha->key.len))
             {
                 break;
             }
@@ -457,8 +451,7 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
             ha = ngx_array_push(&cmcf->amf_arrays);
             ha->key = h->name;
             ha->key_hash = ngx_hash_key_lc(ha->key.data, ha->key.len);
-            ha->value = ngx_array_create(cf->pool, 1,
-                    sizeof(ngx_rtmp_handler_pt));
+            ha->value = ngx_array_create(cf->pool, 1, sizeof(ngx_rtmp_handler_pt));
             if (ha->value == NULL) {
                 return NGX_ERROR;
             }
@@ -476,8 +469,7 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
     calls_hash.pool = cf->pool;
     calls_hash.temp_pool = NULL;
 
-    if (ngx_hash_init(&calls_hash, cmcf->amf_arrays.elts, cmcf->amf_arrays.nelts)
-            != NGX_OK)
+    if (ngx_hash_init(&calls_hash, cmcf->amf_arrays.elts, cmcf->amf_arrays.nelts) != NGX_OK)
     {
         return NGX_ERROR;
     }
@@ -487,8 +479,7 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
 
 
 static ngx_int_t
-ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
-    ngx_rtmp_listen_t *listen)
+ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports, ngx_rtmp_listen_t *listen)
 {
     in_port_t              p;
     ngx_uint_t             i;
@@ -538,8 +529,7 @@ ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
     port->family = sa->sa_family;
     port->port = p;
 
-    if (ngx_array_init(&port->addrs, cf->temp_pool, 2,
-                       sizeof(ngx_rtmp_conf_addr_t))
+    if (ngx_array_init(&port->addrs, cf->temp_pool, 2, sizeof(ngx_rtmp_conf_addr_t))
         != NGX_OK)
     {
         return NGX_ERROR;
@@ -687,8 +677,7 @@ ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport,
     struct sockaddr_in  *sin;
     u_char               buf[NGX_SOCKADDR_STRLEN];
 
-    mport->addrs = ngx_pcalloc(cf->pool,
-                               mport->naddrs * sizeof(ngx_rtmp_in_addr_t));
+    mport->addrs = ngx_pcalloc(cf->pool, mport->naddrs * sizeof(ngx_rtmp_in_addr_t));
     if (mport->addrs == NULL) {
         return NGX_ERROR;
     }
@@ -727,8 +716,7 @@ ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport,
 #if (NGX_HAVE_INET6)
 
 static ngx_int_t
-ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport,
-    ngx_rtmp_conf_addr_t *addr)
+ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t *addr)
 {
     u_char               *p;
     size_t                len;
@@ -737,8 +725,7 @@ ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport,
     struct sockaddr_in6  *sin6;
     u_char                buf[NGX_SOCKADDR_STRLEN];
 
-    mport->addrs = ngx_pcalloc(cf->pool,
-                               mport->naddrs * sizeof(ngx_rtmp_in6_addr_t));
+    mport->addrs = ngx_pcalloc(cf->pool, mport->naddrs * sizeof(ngx_rtmp_in6_addr_t));
     if (mport->addrs == NULL) {
         return NGX_ERROR;
     }
@@ -806,8 +793,7 @@ ngx_rtmp_cmp_conf_addrs(const void *one, const void *two)
 
 
 ngx_int_t
-ngx_rtmp_fire_event(ngx_rtmp_session_t *s, ngx_uint_t evt,
-        ngx_rtmp_header_t *h, ngx_chain_t *in)
+ngx_rtmp_fire_event(ngx_rtmp_session_t *s, ngx_uint_t evt, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_rtmp_core_main_conf_t      *cmcf;
     ngx_array_t                    *ch;

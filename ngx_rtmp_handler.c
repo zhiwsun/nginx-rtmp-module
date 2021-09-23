@@ -105,8 +105,7 @@ ngx_rtmp_alloc_in_buf(ngx_rtmp_session_t *s)
     ngx_buf_t          *b;
     size_t              size;
 
-    if ((cl = ngx_alloc_chain_link(s->in_pool)) == NULL
-       || (cl->buf = ngx_calloc_buf(s->in_pool)) == NULL)
+    if ((cl = ngx_alloc_chain_link(s->in_pool)) == NULL || (cl->buf = ngx_calloc_buf(s->in_pool)) == NULL)
     {
         return NULL;
     }
@@ -565,8 +564,7 @@ ngx_rtmp_send(ngx_event_t *wev)
 
 
 void
-ngx_rtmp_prepare_message(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-        ngx_rtmp_header_t *lh, ngx_chain_t *out)
+ngx_rtmp_prepare_message(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_rtmp_header_t *lh, ngx_chain_t *out)
 {
     ngx_chain_t                *l;
     u_char                     *p, *pp;
@@ -582,9 +580,7 @@ ngx_rtmp_prepare_message(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     cscf = ngx_rtmp_get_module_srv_conf(s, ngx_rtmp_core_module);
 
     if (h->csid >= (uint32_t)cscf->max_streams) {
-        ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                "RTMP out chunk stream too big: %D >= %D",
-                h->csid, cscf->max_streams);
+        ngx_log_error(NGX_LOG_INFO, c->log, 0, "RTMP out chunk stream too big: %D >= %D", h->csid, cscf->max_streams);
         ngx_rtmp_finalize_session(s);
         return;
     }

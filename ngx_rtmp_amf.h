@@ -59,12 +59,10 @@ typedef struct {
 
 
 /* reading AMF */
-ngx_int_t ngx_rtmp_amf_read(ngx_rtmp_amf_ctx_t *ctx,
-        ngx_rtmp_amf_elt_t *elts, size_t nelts);
+ngx_int_t ngx_rtmp_amf_read(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts, size_t nelts);
 
 /* writing AMF */
-ngx_int_t ngx_rtmp_amf_write(ngx_rtmp_amf_ctx_t *ctx,
-        ngx_rtmp_amf_elt_t *elts, size_t nelts);
+ngx_int_t ngx_rtmp_amf_write(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts, size_t nelts);
 
 
 #endif /* _NGX_RTMP_AMF_H_INCLUDED_ */

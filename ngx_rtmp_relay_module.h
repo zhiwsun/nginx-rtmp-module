@@ -63,10 +63,8 @@ struct ngx_rtmp_relay_ctx_s {
 extern ngx_module_t                 ngx_rtmp_relay_module;
 
 
-ngx_int_t ngx_rtmp_relay_pull(ngx_rtmp_session_t *s, ngx_str_t *name,
-                              ngx_rtmp_relay_target_t *target);
-ngx_int_t ngx_rtmp_relay_push(ngx_rtmp_session_t *s, ngx_str_t *name,
-                              ngx_rtmp_relay_target_t *target);
+ngx_int_t ngx_rtmp_relay_pull(ngx_rtmp_session_t *s, ngx_str_t *name, ngx_rtmp_relay_target_t *target);
+ngx_int_t ngx_rtmp_relay_push(ngx_rtmp_session_t *s, ngx_str_t *name, ngx_rtmp_relay_target_t *target);
 
 
 #endif /* _NGX_RTMP_RELAY_H_INCLUDED_ */

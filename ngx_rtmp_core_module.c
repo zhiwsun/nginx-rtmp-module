@@ -13,17 +13,12 @@
 
 static void *ngx_rtmp_core_create_main_conf(ngx_conf_t *cf);
 static void *ngx_rtmp_core_create_srv_conf(ngx_conf_t *cf);
-static char *ngx_rtmp_core_merge_srv_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+static char *ngx_rtmp_core_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child);
 static void *ngx_rtmp_core_create_app_conf(ngx_conf_t *cf);
-static char *ngx_rtmp_core_merge_app_conf(ngx_conf_t *cf, void *parent,
-    void *child);
-static char *ngx_rtmp_core_server(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_rtmp_core_listen(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_rtmp_core_application(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_rtmp_core_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
+static char *ngx_rtmp_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_rtmp_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_rtmp_core_application(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 ngx_rtmp_core_main_conf_t      *ngx_rtmp_core_main_conf;
@@ -268,11 +263,9 @@ ngx_rtmp_core_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_value(conf->max_streams, prev->max_streams, 32);
     ngx_conf_merge_value(conf->chunk_size, prev->chunk_size, 4096);
     ngx_conf_merge_uint_value(conf->ack_window, prev->ack_window, 5000000);
-    ngx_conf_merge_size_value(conf->max_message, prev->max_message,
-            1 * 1024 * 1024);
+    ngx_conf_merge_size_value(conf->max_message, prev->max_message, 1 * 1024 * 1024);
     ngx_conf_merge_size_value(conf->out_queue, prev->out_queue, 256);
-    ngx_conf_merge_size_value(conf->out_cork, prev->out_cork,
-            conf->out_queue / 8);
+    ngx_conf_merge_size_value(conf->out_cork, prev->out_cork, conf->out_queue / 8);
     ngx_conf_merge_value(conf->play_time_fix, prev->play_time_fix, 1);
     ngx_conf_merge_value(conf->publish_time_fix, prev->publish_time_fix, 1);
     ngx_conf_merge_msec_value(conf->buflen, prev->buflen, 1000);
@@ -301,8 +294,7 @@ ngx_rtmp_core_create_app_conf(ngx_conf_t *cf)
         return NULL;
     }
 
-    if (ngx_array_init(&conf->applications, cf->pool, 1,
-                       sizeof(ngx_rtmp_core_app_conf_t *))
+    if (ngx_array_init(&conf->applications, cf->pool, 1, sizeof(ngx_rtmp_core_app_conf_t *))
         != NGX_OK)
     {
         return NULL;
