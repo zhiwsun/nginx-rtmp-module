@@ -18,12 +18,6 @@
 #include "ngx_rtmp_bandwidth.h"
 
 
-#if (NGX_WIN32)
-typedef __int8              int8_t;
-typedef unsigned __int8     uint8_t;
-#endif
-
-
 typedef struct {
     void                  **main_conf;
     void                  **srv_conf;
@@ -40,16 +34,8 @@ typedef struct {
 
     unsigned                bind:1;
     unsigned                wildcard:1;
-#if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
-    unsigned                ipv6only:2;
-#endif
     unsigned                so_keepalive:2;
     unsigned                proxy_protocol:1;
-#if (NGX_HAVE_KEEPALIVE_TUNABLE)
-    int                     tcp_keepidle;
-    int                     tcp_keepintvl;
-    int                     tcp_keepcnt;
-#endif
 } ngx_rtmp_listen_t;
 
 
@@ -59,20 +45,18 @@ typedef struct {
     unsigned                proxy_protocol:1;
 } ngx_rtmp_addr_conf_t;
 
+
 typedef struct {
     in_addr_t               addr;
     ngx_rtmp_addr_conf_t    conf;
 } ngx_rtmp_in_addr_t;
 
 
-#if (NGX_HAVE_INET6)
-
 typedef struct {
     struct in6_addr         addr6;
     ngx_rtmp_addr_conf_t    conf;
 } ngx_rtmp_in6_addr_t;
 
-#endif
 
 
 typedef struct {
@@ -91,21 +75,12 @@ typedef struct {
 typedef struct {
     struct sockaddr        *sockaddr;
     socklen_t               socklen;
-
     ngx_rtmp_conf_ctx_t    *ctx;
 
     unsigned                bind:1;
     unsigned                wildcard:1;
-#if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
-    unsigned                ipv6only:2;
-#endif
     unsigned                so_keepalive:2;
     unsigned                proxy_protocol:1;
-#if (NGX_HAVE_KEEPALIVE_TUNABLE)
-    int                     tcp_keepidle;
-    int                     tcp_keepintvl;
-    int                     tcp_keepcnt;
-#endif
 } ngx_rtmp_conf_addr_t;
 
 
@@ -173,19 +148,11 @@ typedef struct {
 
 typedef struct {
     ngx_rtmp_header_t       hdr;
-    uint32_t                dtime;
+    uint32_t                dtime;      /* delta time */
     uint32_t                len;        /* current fragment length */
     uint8_t                 ext;
     ngx_chain_t            *in;
 } ngx_rtmp_stream_t;
-
-
-/* disable zero-sized array warning by msvc */
-
-#if (NGX_WIN32)
-#pragma warning(push)
-#pragma warning(disable:4200)
-#endif
 
 
 typedef struct {
@@ -201,11 +168,7 @@ typedef struct {
     ngx_str_t              *addr_text;
     int                     connected;
 
-#if (nginx_version >= 1007005)
     ngx_queue_t             posted_dry_events;
-#else
-    ngx_event_t            *posted_dry_events;
-#endif
 
     /* client buffer time in msec */
     uint32_t                buflen;
@@ -243,8 +206,7 @@ typedef struct {
     unsigned                relay:1;
     unsigned                static_relay:1;
 
-    /* input stream 0 (reserved by RTMP spec)
-     * is used as free chain link */
+    /* input stream 0 (reserved by RTMP spec) is used as free chain link */
 
     ngx_rtmp_stream_t      *in_streams;
     uint32_t                in_csid;
@@ -269,11 +231,6 @@ typedef struct {
     size_t                  out_cork;
     ngx_chain_t            *out[0];
 } ngx_rtmp_session_t;
-
-
-#if (NGX_WIN32)
-#pragma warning(pop)
-#endif
 
 
 /* handler result code:
@@ -346,7 +303,7 @@ typedef struct {
 } ngx_rtmp_error_log_ctx_t;
 
 
-// RTMP配置相关回调函数，可以理解为ngx_module_t的扩展字段
+// RTMP配置相关回调函数，可以理解为 ngx_module_t 的扩展字段
 typedef struct {
     // ngx_rtmp.c # ngx_rtmp_block
     ngx_int_t             (*preconfiguration)(ngx_conf_t *cf);
