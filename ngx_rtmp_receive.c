@@ -451,8 +451,7 @@ ngx_rtmp_amf_message_handler(ngx_rtmp_session_t *s,
 
 
 ngx_int_t
-ngx_rtmp_receive_amf(ngx_rtmp_session_t *s, ngx_chain_t *in,
-        ngx_rtmp_amf_elt_t *elts, size_t nelts)
+ngx_rtmp_receive_amf(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_amf_elt_t *elts, size_t nelts)
 {
     ngx_rtmp_amf_ctx_t     act;
 

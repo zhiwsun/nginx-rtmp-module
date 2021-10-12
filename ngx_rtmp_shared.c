@@ -76,8 +76,7 @@ ngx_rtmp_free_shared_chain(ngx_rtmp_core_srv_conf_t *cscf, ngx_chain_t *in)
 
 
 ngx_chain_t *
-ngx_rtmp_append_shared_bufs(ngx_rtmp_core_srv_conf_t *cscf,
-        ngx_chain_t *head, ngx_chain_t *in)
+ngx_rtmp_append_shared_bufs(ngx_rtmp_core_srv_conf_t *cscf, ngx_chain_t *head, ngx_chain_t *in)
 {
     ngx_chain_t                    *l, **ll;
     u_char                         *p;

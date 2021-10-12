@@ -299,8 +299,7 @@ ngx_rtmp_amf_is_compatible_type(uint8_t t1, uint8_t t2)
 
 
 ngx_int_t
-ngx_rtmp_amf_read(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts,
-        size_t nelts)
+ngx_rtmp_amf_read(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts, size_t nelts)
 {
     void                       *data;
     ngx_int_t                   type;
@@ -328,11 +327,7 @@ ngx_rtmp_amf_read(ngx_rtmp_amf_ctx_t *ctx, ngx_rtmp_amf_elt_t *elts,
                     return NGX_ERROR;
             }
             type = type8;
-            data = (elts &&
-                    ngx_rtmp_amf_is_compatible_type(
-                                 (uint8_t) (elts->type & 0xff), (uint8_t) type))
-                ? elts->data
-                : NULL;
+            data = (elts && ngx_rtmp_amf_is_compatible_type( (uint8_t) (elts->type & 0xff), (uint8_t) type)) ? elts->data : NULL;
 
             if (elts && (elts->type & NGX_RTMP_AMF_CONTEXT)) {
                 if (data) {

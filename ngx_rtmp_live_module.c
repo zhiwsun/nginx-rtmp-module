@@ -187,8 +187,7 @@ ngx_rtmp_live_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
         return NGX_CONF_ERROR;
     }
 
-    conf->streams = ngx_pcalloc(cf->pool,
-            sizeof(ngx_rtmp_live_stream_t *) * conf->nbuckets);
+    conf->streams = ngx_pcalloc(cf->pool, sizeof(ngx_rtmp_live_stream_t *) * conf->nbuckets);
 
     return NGX_CONF_OK;
 }
@@ -241,8 +240,7 @@ ngx_rtmp_live_get_stream(ngx_rtmp_session_t *s, u_char *name, int create)
         return NULL;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-            "live: create stream '%s'", name);
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "live: create stream '%s'", name);
 
     if (lacf->free_streams) {
         *stream = lacf->free_streams;
@@ -268,17 +266,14 @@ ngx_rtmp_live_idle(ngx_event_t *pev)
     c = pev->data;
     s = c->data;
 
-    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                  "live: drop idle publisher");
+    ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "live: drop idle publisher");
 
     ngx_rtmp_finalize_session(s);
 }
 
 
 static void
-ngx_rtmp_live_set_status(ngx_rtmp_session_t *s, ngx_chain_t *control,
-                         ngx_chain_t **status, size_t nstatus,
-                         unsigned active)
+ngx_rtmp_live_set_status(ngx_rtmp_session_t *s, ngx_chain_t *control, ngx_chain_t **status, size_t nstatus, unsigned active)
 {
     ngx_rtmp_live_app_conf_t   *lacf;
     ngx_rtmp_live_ctx_t        *ctx, *pctx;
@@ -290,12 +285,10 @@ ngx_rtmp_live_set_status(ngx_rtmp_session_t *s, ngx_chain_t *control,
 
     ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_live_module);
 
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "live: set active=%ui", active);
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "live: set active=%ui", active);
 
     if (ctx->active == active) {
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                       "live: unchanged active=%ui", active);
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "live: unchanged active=%ui", active);
         return;
     }
 
@@ -324,8 +317,7 @@ ngx_rtmp_live_set_status(ngx_rtmp_session_t *s, ngx_chain_t *control,
 
         for (pctx = ctx->stream->ctx; pctx; pctx = pctx->next) {
             if (pctx->publishing == 0) {
-                ngx_rtmp_live_set_status(pctx->session, control, status,
-                                         nstatus, active);
+                ngx_rtmp_live_set_status(pctx->session, control, status, nstatus, active);
             }
         }
 
@@ -376,15 +368,12 @@ ngx_rtmp_live_start(ngx_rtmp_session_t *s)
     nstatus = 0;
 
     if (lacf->play_restart) {
-        status[nstatus++] = ngx_rtmp_create_status(s, "NetStream.Play.Start",
-                                                   "status", "Start live");
+        status[nstatus++] = ngx_rtmp_create_status(s, "NetStream.Play.Start", "status", "Start live");
         status[nstatus++] = ngx_rtmp_create_sample_access(s);
     }
 
     if (lacf->publish_notify) {
-        status[nstatus++] = ngx_rtmp_create_status(s,
-                                                 "NetStream.Play.PublishNotify",
-                                                 "status", "Start publishing");
+        status[nstatus++] = ngx_rtmp_create_status(s, "NetStream.Play.PublishNotify", "status", "Start publishing");
     }
 
     ngx_rtmp_live_set_status(s, control, status, nstatus, 1);
@@ -856,8 +845,7 @@ ngx_rtmp_live_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         /* send metadata */
 
         if (meta && meta_version != pctx->meta_version) {
-            ngx_log_debug0(NGX_LOG_DEBUG_RTMP, ss->connection->log, 0,
-                           "live: meta");
+            ngx_log_debug0(NGX_LOG_DEBUG_RTMP, ss->connection->log, 0, "live: meta");
 
             if (ngx_rtmp_send_message(ss, meta, 0) == NGX_OK) {
                 pctx->meta_version = meta_version;
@@ -867,8 +855,7 @@ ngx_rtmp_live_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         /* sync stream */
 
         if (cs->active && (lacf->sync && cs->dropped > lacf->sync)) {
-            ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ss->connection->log, 0,
-                           "live: sync %s dropped=%uD", type_s, cs->dropped);
+            ngx_log_debug2(NGX_LOG_DEBUG_RTMP, ss->connection->log, 0, "live: sync %s dropped=%uD", type_s, cs->dropped);
 
             cs->active = 0;
             cs->dropped = 0;

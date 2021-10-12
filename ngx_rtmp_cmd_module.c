@@ -32,6 +32,7 @@ static ngx_int_t ngx_rtmp_cmd_recorded(ngx_rtmp_session_t *s, ngx_rtmp_recorded_
 static ngx_int_t ngx_rtmp_cmd_set_buflen(ngx_rtmp_session_t *s, ngx_rtmp_set_buflen_t *v);
 
 
+// 这里定义的是RTMP控制指令的回调函数，函数指针；在postconfiguration回调函数中赋值
 ngx_rtmp_connect_pt         ngx_rtmp_connect;
 ngx_rtmp_disconnect_pt      ngx_rtmp_disconnect;
 ngx_rtmp_create_stream_pt   ngx_rtmp_create_stream;
@@ -744,6 +745,7 @@ ngx_rtmp_cmd_set_buflen(ngx_rtmp_session_t *s, ngx_rtmp_set_buflen_t *v)
 }
 
 
+// 指令映射：RTMP协议中AMF消息的控制指令，注意这里的方法映射是初始化函数
 static ngx_rtmp_amf_handler_t ngx_rtmp_cmd_map[] = {
     { ngx_string("connect"),            ngx_rtmp_cmd_connect_init           },
     { ngx_string("createStream"),       ngx_rtmp_cmd_create_stream_init     },
@@ -758,6 +760,7 @@ static ngx_rtmp_amf_handler_t ngx_rtmp_cmd_map[] = {
 };
 
 
+// ngx_rtmp.c 初始化配置过程中回调
 static ngx_int_t
 ngx_rtmp_cmd_postconfiguration(ngx_conf_t *cf)
 {
@@ -768,9 +771,10 @@ ngx_rtmp_cmd_postconfiguration(ngx_conf_t *cf)
 
     cmcf = ngx_rtmp_conf_get_module_main_conf(cf, ngx_rtmp_core_module);
 
-    /* redirect disconnects to deleteStream
-     * to free client modules from registering
-     * disconnect callback */
+    /*
+     * redirect disconnects to deleteStream to free client modules
+     * from registering disconnect callback
+     */
 
     h = ngx_array_push(&cmcf->events[NGX_RTMP_DISCONNECT]);
     if (h == NULL) {
@@ -794,6 +798,7 @@ ngx_rtmp_cmd_postconfiguration(ngx_conf_t *cf)
         *ch = *bh;
     }
 
+    // 给各个函数指针赋值，则真实调用的方法是cmd_xxx
     ngx_rtmp_connect = ngx_rtmp_cmd_connect;
     ngx_rtmp_disconnect = ngx_rtmp_cmd_disconnect;
     ngx_rtmp_create_stream = ngx_rtmp_cmd_create_stream;

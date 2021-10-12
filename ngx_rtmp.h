@@ -346,7 +346,9 @@ typedef struct {
 } ngx_rtmp_error_log_ctx_t;
 
 
+// RTMP配置相关回调函数，可以理解为ngx_module_t的扩展字段
 typedef struct {
+    // ngx_rtmp.c # ngx_rtmp_block
     ngx_int_t             (*preconfiguration)(ngx_conf_t *cf);
     ngx_int_t             (*postconfiguration)(ngx_conf_t *cf);
 
@@ -354,14 +356,14 @@ typedef struct {
     char                 *(*init_main_conf)(ngx_conf_t *cf, void *conf);
 
     void                 *(*create_srv_conf)(ngx_conf_t *cf);
-    char                 *(*merge_srv_conf)(ngx_conf_t *cf, void *prev,
-                                    void *conf);
+    char                 *(*merge_srv_conf)(ngx_conf_t *cf, void *prev, void *conf);
 
     void                 *(*create_app_conf)(ngx_conf_t *cf);
-    char                 *(*merge_app_conf)(ngx_conf_t *cf, void *prev,
-                                    void *conf);
+    char                 *(*merge_app_conf)(ngx_conf_t *cf, void *prev, void *conf);
 } ngx_rtmp_module_t;
 
+
+// RTMP模块类型，ngx_module_t.type的枚举
 #define NGX_RTMP_MODULE                 0x504D5452     /* "RTMP" */
 
 #define NGX_RTMP_MAIN_CONF              0x02000000
@@ -399,6 +401,7 @@ char* ngx_rtmp_message_type(uint8_t type);
 char* ngx_rtmp_user_message_type(uint16_t evt);
 #endif
 
+// 初始化连接，RTMP握手
 void ngx_rtmp_init_connection(ngx_connection_t *c);
 ngx_rtmp_session_t * ngx_rtmp_init_session(ngx_connection_t *c, ngx_rtmp_addr_conf_t *addr_conf);
 void ngx_rtmp_finalize_session(ngx_rtmp_session_t *s);

@@ -19,8 +19,7 @@ static ngx_int_t ngx_rtmp_stat_init_process(ngx_cycle_t *cycle);
 static char *ngx_rtmp_stat(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_rtmp_stat_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_stat_create_loc_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_stat_merge_loc_conf(ngx_conf_t *cf,
-        void *parent, void *child);
+static char * ngx_rtmp_stat_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 
 
 static time_t                       start_time;

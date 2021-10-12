@@ -29,14 +29,10 @@ static ngx_int_t ngx_rtmp_exec_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_exec_create_main_conf(ngx_conf_t *cf);
 static char * ngx_rtmp_exec_init_main_conf(ngx_conf_t *cf, void *conf);
 static void * ngx_rtmp_exec_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_exec_merge_app_conf(ngx_conf_t *cf,
-       void *parent, void *child);
-/*static char * ngx_rtmp_exec_block(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);*/
-static char * ngx_rtmp_exec_conf(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
-static char *ngx_rtmp_exec_kill_signal(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
+static char * ngx_rtmp_exec_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
+/*static char * ngx_rtmp_exec_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);*/
+static char * ngx_rtmp_exec_conf(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_rtmp_exec_kill_signal(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 #define NGX_RTMP_EXEC_RESPAWN           0x01

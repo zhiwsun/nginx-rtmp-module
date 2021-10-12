@@ -19,10 +19,8 @@ static void ngx_rtmp_auto_push_exit_process(ngx_cycle_t *cycle);
 static void * ngx_rtmp_auto_push_create_conf(ngx_cycle_t *cf);
 static char * ngx_rtmp_auto_push_init_conf(ngx_cycle_t *cycle, void *conf);
 #if (NGX_HAVE_UNIX_DOMAIN)
-static ngx_int_t ngx_rtmp_auto_push_publish(ngx_rtmp_session_t *s,
-       ngx_rtmp_publish_t *v);
-static ngx_int_t ngx_rtmp_auto_push_delete_stream(ngx_rtmp_session_t *s,
-       ngx_rtmp_delete_stream_t *v);
+static ngx_int_t ngx_rtmp_auto_push_publish(ngx_rtmp_session_t *s, ngx_rtmp_publish_t *v);
+static ngx_int_t ngx_rtmp_auto_push_delete_stream(ngx_rtmp_session_t *s, ngx_rtmp_delete_stream_t *v);
 #endif
 
 
@@ -124,6 +122,7 @@ ngx_module_t  ngx_rtmp_auto_push_index_module = {
 #define NGX_RTMP_AUTO_PUSH_SOCKNAME         "nginx-rtmp"
 
 
+// worker进程启动时的回调函数
 static ngx_int_t
 ngx_rtmp_auto_push_init_process(ngx_cycle_t *cycle)
 {
@@ -140,8 +139,7 @@ ngx_rtmp_auto_push_init_process(ngx_cycle_t *cycle)
         return NGX_OK;
     }
 
-    apcf = (ngx_rtmp_auto_push_conf_t *) ngx_get_conf(cycle->conf_ctx,
-                                                    ngx_rtmp_auto_push_module);
+    apcf = (ngx_rtmp_auto_push_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_rtmp_auto_push_module);
     if (apcf->auto_push == 0) {
         return NGX_OK;
     }
@@ -216,9 +214,7 @@ ngx_rtmp_auto_push_init_process(ngx_cycle_t *cycle)
         return NGX_ERROR;
     }
 
-    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
-                   (const void *) &reuseaddr, sizeof(int))
-        == -1)
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const void *) &reuseaddr, sizeof(int)) == -1)
     {
         ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_socket_errno,
                 "setsockopt(SO_REUSEADDR) worker_socket failed");
@@ -275,8 +271,7 @@ ngx_rtmp_auto_push_exit_process(ngx_cycle_t *cycle)
     ngx_rtmp_auto_push_conf_t  *apcf;
     u_char                      path[NGX_MAX_PATH];
 
-    apcf = (ngx_rtmp_auto_push_conf_t *) ngx_get_conf(cycle->conf_ctx,
-                                                    ngx_rtmp_auto_push_module);
+    apcf = (ngx_rtmp_auto_push_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_rtmp_auto_push_module);
     if (apcf->auto_push == 0) {
         return;
     }

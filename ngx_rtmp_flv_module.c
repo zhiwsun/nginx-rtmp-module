@@ -13,16 +13,12 @@
 
 static ngx_int_t ngx_rtmp_flv_postconfiguration(ngx_conf_t *cf);
 static void ngx_rtmp_flv_read_meta(ngx_rtmp_session_t *s, ngx_file_t *f);
-static ngx_int_t ngx_rtmp_flv_timestamp_to_offset(ngx_rtmp_session_t *s,
-       ngx_file_t *f, ngx_int_t timestamp);
-static ngx_int_t ngx_rtmp_flv_init(ngx_rtmp_session_t *s, ngx_file_t *f,
-       ngx_int_t aindex, ngx_int_t vindex);
+static ngx_int_t ngx_rtmp_flv_timestamp_to_offset(ngx_rtmp_session_t *s, ngx_file_t *f, ngx_int_t timestamp);
+static ngx_int_t ngx_rtmp_flv_init(ngx_rtmp_session_t *s, ngx_file_t *f, ngx_int_t aindex, ngx_int_t vindex);
 static ngx_int_t ngx_rtmp_flv_start(ngx_rtmp_session_t *s, ngx_file_t *f);
-static ngx_int_t ngx_rtmp_flv_seek(ngx_rtmp_session_t *s, ngx_file_t *f,
-       ngx_uint_t offset);
+static ngx_int_t ngx_rtmp_flv_seek(ngx_rtmp_session_t *s, ngx_file_t *f, ngx_uint_t offset);
 static ngx_int_t ngx_rtmp_flv_stop(ngx_rtmp_session_t *s, ngx_file_t *f);
-static ngx_int_t ngx_rtmp_flv_send(ngx_rtmp_session_t *s, ngx_file_t *f,
-                                   ngx_uint_t *ts);
+static ngx_int_t ngx_rtmp_flv_send(ngx_rtmp_session_t *s, ngx_file_t *f, ngx_uint_t *ts);
 
 
 typedef struct {

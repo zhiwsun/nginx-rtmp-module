@@ -12,15 +12,12 @@
 
 
 static ngx_int_t ngx_rtmp_mp4_postconfiguration(ngx_conf_t *cf);
-static ngx_int_t ngx_rtmp_mp4_init(ngx_rtmp_session_t *s,  ngx_file_t *f,
-       ngx_int_t aindex, ngx_int_t vindex);
+static ngx_int_t ngx_rtmp_mp4_init(ngx_rtmp_session_t *s,  ngx_file_t *f, ngx_int_t aindex, ngx_int_t vindex);
 static ngx_int_t ngx_rtmp_mp4_done(ngx_rtmp_session_t *s,  ngx_file_t *f);
 static ngx_int_t ngx_rtmp_mp4_start(ngx_rtmp_session_t *s, ngx_file_t *f);
-static ngx_int_t ngx_rtmp_mp4_seek(ngx_rtmp_session_t *s,  ngx_file_t *f,
-                                   ngx_uint_t offset);
+static ngx_int_t ngx_rtmp_mp4_seek(ngx_rtmp_session_t *s,  ngx_file_t *f, ngx_uint_t offset);
 static ngx_int_t ngx_rtmp_mp4_stop(ngx_rtmp_session_t *s,  ngx_file_t *f);
-static ngx_int_t ngx_rtmp_mp4_send(ngx_rtmp_session_t *s,  ngx_file_t *f,
-                                   ngx_uint_t *ts);
+static ngx_int_t ngx_rtmp_mp4_send(ngx_rtmp_session_t *s,  ngx_file_t *f, ngx_uint_t *ts);
 static ngx_int_t ngx_rtmp_mp4_reset(ngx_rtmp_session_t *s);
 
 
@@ -300,52 +297,30 @@ ngx_rtmp_mp4_munmap(void *data, size_t size, ngx_fd_t *extra)
 #endif
 
 
-static ngx_int_t ngx_rtmp_mp4_parse(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_trak(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_mdhd(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_hdlr(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_stsd(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_stsc(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_stts(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_ctts(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_stss(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_stsz(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_stz2(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_stco(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_co64(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_avc1(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_avcC(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_mp4a(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_mp4v(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_esds(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_mp3(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_nmos(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_spex(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_trak(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_mdhd(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_hdlr(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_stsd(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_stsc(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_stts(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_ctts(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_stss(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_stsz(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_stz2(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_stco(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_co64(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_avc1(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_avcC(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_mp4a(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_mp4v(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_esds(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_mp3(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_nmos(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_spex(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
 
 
-typedef ngx_int_t (*ngx_rtmp_mp4_box_pt)(ngx_rtmp_session_t *s, u_char *pos,
-                                         u_char *last);
+typedef ngx_int_t (*ngx_rtmp_mp4_box_pt)(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
 
 typedef struct {
     uint32_t                            tag;
@@ -381,18 +356,13 @@ static ngx_rtmp_mp4_box_t                       ngx_rtmp_mp4_boxes[] = {
 };
 
 
-static ngx_int_t ngx_rtmp_mp4_parse_descr(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_es(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_dc(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
-static ngx_int_t ngx_rtmp_mp4_parse_ds(ngx_rtmp_session_t *s, u_char *pos,
-       u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_descr(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_es(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_dc(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
+static ngx_int_t ngx_rtmp_mp4_parse_ds(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
 
 
-typedef ngx_int_t (*ngx_rtmp_mp4_descriptor_pt)(ngx_rtmp_session_t *s,
-                                                u_char *pos, u_char *last);
+typedef ngx_int_t (*ngx_rtmp_mp4_descriptor_pt)(ngx_rtmp_session_t *s, u_char *pos, u_char *last);
 
 typedef struct {
     uint8_t                             tag;
@@ -446,27 +416,22 @@ ngx_rtmp_mp4_parse_trak(ngx_rtmp_session_t *s, u_char *pos, u_char *last)
         return NGX_OK;
     }
 
-    ctx->track = (ctx->ntracks == sizeof(ctx->tracks) / sizeof(ctx->tracks[0]))
-                 ? NULL : &ctx->tracks[ctx->ntracks];
+    ctx->track = (ctx->ntracks == sizeof(ctx->tracks) / sizeof(ctx->tracks[0])) ? NULL : &ctx->tracks[ctx->ntracks];
 
     if (ctx->track) {
         ngx_memzero(ctx->track, sizeof(*ctx->track));
         ctx->track->id = ctx->ntracks;
 
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                       "mp4: trying track %ui", ctx->ntracks);
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "mp4: trying track %ui", ctx->ntracks);
     }
 
     if (ngx_rtmp_mp4_parse(s, pos, last) != NGX_OK) {
         return NGX_ERROR;
     }
 
-    if (ctx->track && ctx->track->type &&
-        (ctx->ntracks == 0 ||
-         ctx->tracks[0].type != ctx->tracks[ctx->ntracks].type))
+    if (ctx->track && ctx->track->type && (ctx->ntracks == 0 || ctx->tracks[0].type != ctx->tracks[ctx->ntracks].type))
     {
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                       "mp4: adding track %ui", ctx->ntracks);
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "mp4: adding track %ui", ctx->ntracks);
 
         if (ctx->track->type == NGX_RTMP_MSG_AUDIO) {
             if (ctx->atracks++ != ctx->aindex) {
@@ -490,8 +455,7 @@ ngx_rtmp_mp4_parse_trak(ngx_rtmp_session_t *s, u_char *pos, u_char *last)
         ++ctx->ntracks;
 
     } else {
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                       "mp4: ignoring track %ui", ctx->ntracks);
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "mp4: ignoring track %ui", ctx->ntracks);
     }
 
     ctx->track = NULL;

@@ -18,12 +18,10 @@ static ngx_rtmp_play_pt             next_play;
 #define NGX_RTMP_ACCESS_PLAY        0x02
 
 
-static char * ngx_rtmp_access_rule(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
+static char * ngx_rtmp_access_rule(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_rtmp_access_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_access_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_access_merge_app_conf(ngx_conf_t *cf,
-       void *parent, void *child);
+static char * ngx_rtmp_access_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 
 
 typedef struct {
@@ -53,6 +51,8 @@ typedef struct {
 #endif
 } ngx_rtmp_access_app_conf_t;
 
+
+// ZHIWU: 监听play，publish事件，对IP做检查访问
 
 static ngx_command_t  ngx_rtmp_access_commands[] = {
 
@@ -87,6 +87,7 @@ static ngx_rtmp_module_t  ngx_rtmp_access_module_ctx = {
 
 
 ngx_module_t  ngx_rtmp_access_module = {
+    // NGX_MODULE_V1 宏定义的默认7个参数
     NGX_MODULE_V1,
     &ngx_rtmp_access_module_ctx,            /* module context */
     ngx_rtmp_access_commands,               /* module directives */
@@ -112,17 +113,13 @@ ngx_rtmp_access_create_app_conf(ngx_conf_t *cf)
         return NULL;
     }
 
-    if (ngx_array_init(&aacf->rules, cf->pool, 1,
-                       sizeof(ngx_rtmp_access_rule_t))
-        != NGX_OK)
+    if (ngx_array_init(&aacf->rules, cf->pool, 1, sizeof(ngx_rtmp_access_rule_t)) != NGX_OK)
     {
         return NULL;
     }
 
 #if (NGX_HAVE_INET6)
-    if (ngx_array_init(&aacf->rules6, cf->pool, 1,
-                       sizeof(ngx_rtmp_access_rule6_t))
-        != NGX_OK)
+    if (ngx_array_init(&aacf->rules6, cf->pool, 1, sizeof(ngx_rtmp_access_rule6_t)) != NGX_OK)
     {
         return NULL;
     }

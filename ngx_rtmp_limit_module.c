@@ -22,6 +22,8 @@ static ngx_int_t ngx_rtmp_limit_postconfiguration(ngx_conf_t *cf);
 static void *ngx_rtmp_limit_create_main_conf(ngx_conf_t *cf);
 
 
+// ZHIWU: 监听connect以及disconnect事件，通过计算连接数量来限制连接个数
+
 static ngx_command_t  ngx_rtmp_limit_commands[] = {
 
     { ngx_string("max_connections"),
@@ -193,8 +195,7 @@ ngx_rtmp_limit_postconfiguration(ngx_conf_t *cf)
         return NGX_OK;
     }
 
-    lmcf->shm_zone = ngx_shared_memory_add(cf, &shm_name, ngx_pagesize * 2,
-                                           &ngx_rtmp_limit_module);
+    lmcf->shm_zone = ngx_shared_memory_add(cf, &shm_name, ngx_pagesize * 2, &ngx_rtmp_limit_module);
     if (lmcf->shm_zone == NULL) {
         return NGX_ERROR;
     }

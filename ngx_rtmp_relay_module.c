@@ -241,8 +241,7 @@ ngx_rtmp_relay_push_reconnect(ngx_event_t *ev)
     ngx_uint_t                      n;
     ngx_rtmp_relay_target_t        *target, **t;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-            "relay: push reconnect");
+    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "relay: push reconnect");
 
     racf = ngx_rtmp_get_module_app_conf(s, ngx_rtmp_relay_module);
 

@@ -11,34 +11,31 @@
 #include "ngx_rtmp.h"
 
 
+// RTMP配置处理入口
 static char *ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+
 static ngx_int_t ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports, ngx_rtmp_listen_t *listen);
 static char *ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports);
+
 static ngx_int_t ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t *addr);
-#if (NGX_HAVE_INET6)
 static ngx_int_t ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t *addr);
-#endif
+
 static ngx_int_t ngx_rtmp_cmp_conf_addrs(const void *one, const void *two);
+
 static ngx_int_t ngx_rtmp_init_events(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf);
 static ngx_int_t ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf);
+
 static char * ngx_rtmp_merge_applications(ngx_conf_t *cf, ngx_array_t *applications, void **app_conf, ngx_rtmp_module_t *module, ngx_uint_t ctx_index);
 static ngx_int_t ngx_rtmp_init_process(ngx_cycle_t *cycle);
 
 
-#if (nginx_version >= 1007011)
-ngx_queue_t                         ngx_rtmp_init_queue;
-#elif (nginx_version >= 1007005)
-ngx_thread_volatile ngx_queue_t     ngx_rtmp_init_queue;
-#else
-ngx_thread_volatile ngx_event_t    *ngx_rtmp_init_queue;
-#endif
-
-
-ngx_uint_t  ngx_rtmp_max_module;
+ngx_queue_t   ngx_rtmp_init_queue;
+ngx_uint_t    ngx_rtmp_max_module;
 
 
 static ngx_command_t  ngx_rtmp_commands[] = {
 
+    // RTMP配置块的处理入口
     { ngx_string("rtmp"),
       NGX_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
       ngx_rtmp_block,
@@ -57,14 +54,16 @@ static ngx_core_module_t  ngx_rtmp_module_ctx = {
 };
 
 
-// ZHIWU: nginx_module定义，nginx初始化过程须要这个节点的定义；如果须要挂载在nginx启动过程，则需要在nginx配置编译阶段加入ngx_modules.c中
+// Nginx初始化过程须要这个节点的定义；如果须要挂载在nginx启动过程，则需要在nginx配置编译阶段加入ngx_modules.c中
 ngx_module_t  ngx_rtmp_module = {
     NGX_MODULE_V1,
     &ngx_rtmp_module_ctx,                  /* module context */
     ngx_rtmp_commands,                     /* module directives */
+    /* CORE_MODULE */
     NGX_CORE_MODULE,                       /* module type */
     NULL,                                  /* init master */
     NULL,                                  /* init module */
+    // 在启动worker进程时都会执行
     ngx_rtmp_init_process,                 /* init process */
     NULL,                                  /* init thread */
     NULL,                                  /* exit thread */
@@ -74,6 +73,7 @@ ngx_module_t  ngx_rtmp_module = {
 };
 
 
+// 模块配置初始化
 static char *
 ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
@@ -95,67 +95,41 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     *(ngx_rtmp_conf_ctx_t **) conf = ctx;
 
-    /* count the number of the rtmp modules and set up their indices */
-
-#if (nginx_version >= 1009011)
-
+    /*
+     * count the number of the rtmp modules and set up their indices
+     */
     ngx_rtmp_max_module = ngx_count_modules(cf->cycle, NGX_RTMP_MODULE);
 
-#else
-
-    ngx_rtmp_max_module = 0;
-    for (m = 0; ngx_modules[m]; m++) {
-        if (ngx_modules[m]->type != NGX_RTMP_MODULE) {
-            continue;
-        }
-
-        ngx_modules[m]->ctx_index = ngx_rtmp_max_module++;
-    }
-
-#endif
-
-
-    /* the rtmp main_conf context, it is the same in the all rtmp contexts */
-
+    /*
+     * the rtmp main_conf context, it is the same in the all rtmp contexts
+     */
     ctx->main_conf = ngx_pcalloc(cf->pool, sizeof(void *) * ngx_rtmp_max_module);
     if (ctx->main_conf == NULL) {
         return NGX_CONF_ERROR;
     }
 
-
     /*
-     * the rtmp null srv_conf context, it is used to merge
-     * the server{}s' srv_conf's
+     * the rtmp null srv_conf context, it is used to merge the server{}s' srv_conf's
      */
-
     ctx->srv_conf = ngx_pcalloc(cf->pool, sizeof(void *) * ngx_rtmp_max_module);
     if (ctx->srv_conf == NULL) {
         return NGX_CONF_ERROR;
     }
 
-
     /*
-     * the rtmp null app_conf context, it is used to merge
-     * the server{}s' app_conf's
+     * the rtmp null app_conf context, it is used to merge the server{}s' app_conf's
      */
-
     ctx->app_conf = ngx_pcalloc(cf->pool, sizeof(void *) * ngx_rtmp_max_module);
     if (ctx->app_conf == NULL) {
         return NGX_CONF_ERROR;
     }
 
-
     /*
-     * create the main_conf's, the null srv_conf's, and the null app_conf's
-     * of the all rtmp modules
+     * create the main_conf's, the null srv_conf's, and the null app_conf's of the all rtmp modules
      */
-
-#if (nginx_version >= 1009011)
     modules = cf->cycle->modules;
-#else
-    modules = ngx_modules;
-#endif
 
+    // 根据modules配置类型，依次执行 create_main_conf, create_srv_conf, create_app_cnf 回调函数
     for (m = 0; modules[m]; m++) {
         if (modules[m]->type != NGX_RTMP_MODULE) {
             continue;
@@ -189,6 +163,7 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     pcf = *cf;
     cf->ctx = ctx;
 
+    // 回调函数：modules[i]->ctx->preconfiguration
     for (m = 0; modules[m]; m++) {
         if (modules[m]->type != NGX_RTMP_MODULE) {
             continue;
@@ -215,8 +190,9 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
 
-    /* init rtmp{} main_conf's, merge the server{}s' srv_conf's */
-
+    /*
+     * init rtmp{} main_conf's, merge the server{}s' srv_conf's
+     */
     cmcf = ctx->main_conf[ngx_rtmp_core_module.ctx_index];
     cscfp = cmcf->servers.elts;
 
@@ -247,9 +223,7 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             cf->ctx = cscfp[s]->ctx;
 
             if (module->merge_srv_conf) {
-                rv = module->merge_srv_conf(cf,
-                                            ctx->srv_conf[mi],
-                                            cscfp[s]->ctx->srv_conf[mi]);
+                rv = module->merge_srv_conf(cf, ctx->srv_conf[mi], cscfp[s]->ctx->srv_conf[mi]);
                 if (rv != NGX_CONF_OK) {
                     *cf = pcf;
                     return rv;
@@ -262,9 +236,7 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
                 /*ctx->app_conf = cscfp[s]->ctx->loc_conf;*/
 
-                rv = module->merge_app_conf(cf,
-                                            ctx->app_conf[mi],
-                                            cscfp[s]->ctx->app_conf[mi]);
+                rv = module->merge_app_conf(cf, ctx->app_conf[mi], cscfp[s]->ctx->app_conf[mi]);
                 if (rv != NGX_CONF_OK) {
                     *cf = pcf;
                     return rv;
@@ -274,9 +246,7 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
                 cscf = cscfp[s]->ctx->srv_conf[ngx_rtmp_core_module.ctx_index];
 
-                rv = ngx_rtmp_merge_applications(cf, &cscf->applications,
-                                            cscfp[s]->ctx->app_conf,
-                                            module, mi);
+                rv = ngx_rtmp_merge_applications(cf, &cscf->applications, cscfp[s]->ctx->app_conf, module, mi);
                 if (rv != NGX_CONF_OK) {
                     *cf = pcf;
                     return rv;
@@ -287,10 +257,12 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
 
+    // 初始化 rtmp events 事件
     if (ngx_rtmp_init_events(cf, cmcf) != NGX_OK) {
         return NGX_CONF_ERROR;
     }
 
+    // 回调函数：modules[i]->ctx->postconfiguration
     for (m = 0; modules[m]; m++) {
         if (modules[m]->type != NGX_RTMP_MODULE) {
             continue;
@@ -487,20 +459,15 @@ ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports, ngx_rtmp_listen_t *listen
     struct sockaddr_in    *sin;
     ngx_rtmp_conf_port_t  *port;
     ngx_rtmp_conf_addr_t  *addr;
-#if (NGX_HAVE_INET6)
     struct sockaddr_in6   *sin6;
-#endif
-
     sa = (struct sockaddr *) &listen->sockaddr;
 
     switch (sa->sa_family) {
 
-#if (NGX_HAVE_INET6)
     case AF_INET6:
         sin6 = (struct sockaddr_in6 *) sa;
         p = sin6->sin6_port;
         break;
-#endif
 
     default: /* AF_INET */
         sin = (struct sockaddr_in *) sa;
@@ -529,8 +496,7 @@ ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports, ngx_rtmp_listen_t *listen
     port->family = sa->sa_family;
     port->port = p;
 
-    if (ngx_array_init(&port->addrs, cf->temp_pool, 2, sizeof(ngx_rtmp_conf_addr_t))
-        != NGX_OK)
+    if (ngx_array_init(&port->addrs, cf->temp_pool, 2, sizeof(ngx_rtmp_conf_addr_t)) != NGX_OK)
     {
         return NGX_ERROR;
     }
@@ -549,14 +515,7 @@ found:
     addr->wildcard = listen->wildcard;
     addr->so_keepalive = listen->so_keepalive;
     addr->proxy_protocol = listen->proxy_protocol;
-#if (NGX_HAVE_KEEPALIVE_TUNABLE)
-    addr->tcp_keepidle = listen->tcp_keepidle;
-    addr->tcp_keepintvl = listen->tcp_keepintvl;
-    addr->tcp_keepcnt = listen->tcp_keepcnt;
-#endif
-#if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
     addr->ipv6only = listen->ipv6only;
-#endif
 
     return NGX_OK;
 }
@@ -574,8 +533,7 @@ ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
     port = ports->elts;
     for (p = 0; p < ports->nelts; p++) {
 
-        ngx_sort(port[p].addrs.elts, (size_t) port[p].addrs.nelts,
-                 sizeof(ngx_rtmp_conf_addr_t), ngx_rtmp_cmp_conf_addrs);
+        ngx_sort(port[p].addrs.elts, (size_t) port[p].addrs.nelts, sizeof(ngx_rtmp_conf_addr_t), ngx_rtmp_cmp_conf_addrs);
 
         addr = port[p].addrs.elts;
         last = port[p].addrs.nelts;
@@ -617,15 +575,8 @@ ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
             ls->log.handler = ngx_accept_log_error;
 
             ls->keepalive = addr[i].so_keepalive;
-#if (NGX_HAVE_KEEPALIVE_TUNABLE)
-            ls->keepidle = addr[i].tcp_keepidle;
-            ls->keepintvl = addr[i].tcp_keepintvl;
-            ls->keepcnt = addr[i].tcp_keepcnt;
-#endif
 
-#if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
             ls->ipv6only = addr[i].ipv6only;
-#endif
 
             mport = ngx_palloc(cf->pool, sizeof(ngx_rtmp_port_t));
             if (mport == NULL) {
@@ -643,13 +594,12 @@ ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
             }
 
             switch (ls->sockaddr->sa_family) {
-#if (NGX_HAVE_INET6)
             case AF_INET6:
                 if (ngx_rtmp_add_addrs6(cf, mport, addr) != NGX_OK) {
                     return NGX_CONF_ERROR;
                 }
                 break;
-#endif
+
             default: /* AF_INET */
                 if (ngx_rtmp_add_addrs(cf, mport, addr) != NGX_OK) {
                     return NGX_CONF_ERROR;
@@ -667,8 +617,7 @@ ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
 
 
 static ngx_int_t
-ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport,
-    ngx_rtmp_conf_addr_t *addr)
+ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t *addr)
 {
     u_char              *p;
     size_t               len;
@@ -691,12 +640,7 @@ ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport,
 
         addrs[i].conf.ctx = addr[i].ctx;
 
-        len = ngx_sock_ntop(addr[i].sockaddr,
-#if (nginx_version >= 1005003)
-                            addr[i].socklen,
-#endif
-                            buf, NGX_SOCKADDR_STRLEN, 1);
-
+        len = ngx_sock_ntop(addr[i].sockaddr, addr[i].socklen, buf, NGX_SOCKADDR_STRLEN, 1);
         p = ngx_pnalloc(cf->pool, len);
         if (p == NULL) {
             return NGX_ERROR;
@@ -739,12 +683,7 @@ ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t
 
         addrs6[i].conf.ctx = addr[i].ctx;
 
-        len = ngx_sock_ntop(addr[i].sockaddr,
-#if (nginx_version >= 1005003)
-                            addr[i].socklen,
-#endif
-                            buf, NGX_SOCKADDR_STRLEN, 1);
-
+        len = ngx_sock_ntop(addr[i].sockaddr, addr[i].socklen, buf, NGX_SOCKADDR_STRLEN, 1);
         p = ngx_pnalloc(cf->pool, len);
         if (p == NULL) {
             return NGX_ERROR;
@@ -832,8 +771,6 @@ ngx_rtmp_rmemcpy(void *dst, const void* src, size_t n)
 static ngx_int_t
 ngx_rtmp_init_process(ngx_cycle_t *cycle)
 {
-#if (nginx_version >= 1007005)
     ngx_queue_init(&ngx_rtmp_init_queue);
-#endif
     return NGX_OK;
 }

@@ -350,12 +350,11 @@ ngx_rtmp_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
 
-#if (nginx_version >= 1009011)
     modules = cf->cycle->modules;
-#else
-    modules = ngx_modules;
-#endif
 
+    // 回调函数：NGX_RTMP_MODULE
+    // cf-cycle->modules[i]->ctx->create_srv_conf
+    // cf-cycle->modules[i]->ctx->create_app_conf
     for (m = 0; modules[m]; m++) {
         if (modules[m]->type != NGX_RTMP_MODULE) {
             continue;
@@ -438,12 +437,9 @@ ngx_rtmp_core_application(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
 
-#if (nginx_version >= 1009011)
+    // 回调函数：NGX_RTMP_MODULE
+    // cf-cycle->modules[i]->ctx->create_app_conf
     modules = cf->cycle->modules;
-#else
-    modules = ngx_modules;
-#endif
-
     for (i = 0; modules[i]; i++) {
         if (modules[i]->type != NGX_RTMP_MODULE) {
             continue;
