@@ -178,6 +178,7 @@ ngx_rtmp_cmd_connect_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain
 }
 
 
+// 回调函数： AMF::connect
 static ngx_int_t
 ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s, ngx_rtmp_connect_t *v)
 {
@@ -252,6 +253,7 @@ ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s, ngx_rtmp_connect_t *v)
     /* fill session parameters */
     s->connected = 1;
 
+    // 组装一个响应 AMF::connect 的消息头
     ngx_memzero(&h, sizeof(h));
     h.csid = NGX_RTMP_CSID_AMF_INI;
     h.type = NGX_RTMP_MSG_AMF_CMD;
@@ -297,6 +299,7 @@ ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s, ngx_rtmp_connect_t *v)
 
     object_encoding = v->object_encoding;
 
+    // 把srv_conf和amf响应发回去
     return ngx_rtmp_send_ack_size(s, cscf->ack_window) != NGX_OK ||
            ngx_rtmp_send_bandwidth(s, cscf->ack_window, NGX_RTMP_LIMIT_DYNAMIC) != NGX_OK ||
            ngx_rtmp_send_chunk_size(s, cscf->chunk_size) != NGX_OK ||
@@ -327,6 +330,7 @@ ngx_rtmp_cmd_create_stream_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx
 }
 
 
+// 回调函数： AMF::createStream
 static ngx_int_t
 ngx_rtmp_cmd_create_stream(ngx_rtmp_session_t *s, ngx_rtmp_create_stream_t *v)
 {
@@ -438,6 +442,7 @@ ngx_rtmp_cmd_delete_stream(ngx_rtmp_session_t *s, ngx_rtmp_delete_stream_t *v)
 }
 
 
+// 回调函数：AMF::publish
 static ngx_int_t
 ngx_rtmp_cmd_publish_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
@@ -786,17 +791,13 @@ ngx_rtmp_cmd_postconfiguration(ngx_conf_t *cf)
 
     *h = ngx_rtmp_cmd_disconnect_init;
 
-    /* register AMF callbacks */
-
+    /* 注册AMF的回调函数，回调函数存在cmcf->amf中 */
     ncalls = sizeof(ngx_rtmp_cmd_map) / sizeof(ngx_rtmp_cmd_map[0]);
-
     ch = ngx_array_push_n(&cmcf->amf, ncalls);
     if (ch == NULL) {
         return NGX_ERROR;
     }
-
     bh = ngx_rtmp_cmd_map;
-
     for(n = 0; n < ncalls; ++n, ++ch, ++bh) {
         *ch = *bh;
     }

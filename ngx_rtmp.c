@@ -378,6 +378,7 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
     ngx_hash_key_t             *ha;
     size_t                      n, m;
 
+    // RTMP标准协议事件，由 ngx_rtmp_protocol_message_handler 处理
     static size_t               pm_events[] = {
         NGX_RTMP_MSG_CHUNK_SIZE,
         NGX_RTMP_MSG_ABORT,
@@ -386,6 +387,7 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
         NGX_RTMP_MSG_BANDWIDTH
     };
 
+    // AMF消息事件，由 ngx_rtmp_amf_message_handler 处理
     static size_t               amf_events[] = {
         NGX_RTMP_MSG_AMF_CMD,
         NGX_RTMP_MSG_AMF_META,

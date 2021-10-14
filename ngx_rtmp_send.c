@@ -88,8 +88,7 @@ ngx_rtmp_create_chunk_size(ngx_rtmp_session_t *s, uint32_t chunk_size)
 ngx_int_t
 ngx_rtmp_send_chunk_size(ngx_rtmp_session_t *s, uint32_t chunk_size)
 {
-    return ngx_rtmp_send_shared_packet(s,
-           ngx_rtmp_create_chunk_size(s, chunk_size));
+    return ngx_rtmp_send_shared_packet(s, ngx_rtmp_create_chunk_size(s, chunk_size));
 }
 
 
@@ -442,11 +441,9 @@ ngx_rtmp_create_amf(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_rtmp_amf_el
 
 
 ngx_int_t
-ngx_rtmp_send_amf(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-                  ngx_rtmp_amf_elt_t *elts, size_t nelts)
+ngx_rtmp_send_amf(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_rtmp_amf_elt_t *elts, size_t nelts)
 {
-    return ngx_rtmp_send_shared_packet(s,
-           ngx_rtmp_create_amf(s, h, elts, nelts));
+    return ngx_rtmp_send_shared_packet(s, ngx_rtmp_create_amf(s, h, elts, nelts));
 }
 
 
