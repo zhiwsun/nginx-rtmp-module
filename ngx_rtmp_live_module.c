@@ -679,9 +679,10 @@ next:
     return next_pause(s, v);
 }
 
+
+// NGX_RTMP_MSG_AUDIO | NGX_RTMP_MSG_VIDOE 消息回调函数
 static ngx_int_t
-ngx_rtmp_live_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-                 ngx_chain_t *in)
+ngx_rtmp_live_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_rtmp_live_ctx_t            *ctx, *pctx;
     ngx_rtmp_codec_ctx_t           *codec_ctx;
@@ -719,8 +720,7 @@ ngx_rtmp_live_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     }
 
     if (ctx->publishing == 0) {
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                       "live: %s from non-publisher", type_s);
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "live: %s from non-publisher", type_s);
         return NGX_OK;
     }
 
@@ -732,9 +732,7 @@ ngx_rtmp_live_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
         ngx_add_timer(&ctx->idle_evt, lacf->idle_timeout);
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "live: %s packet timestamp=%uD",
-                   type_s, h->timestamp);
+    ngx_log_debug2(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "live: %s packet timestamp=%uD", type_s, h->timestamp);
 
     s->current_time = h->timestamp;
 

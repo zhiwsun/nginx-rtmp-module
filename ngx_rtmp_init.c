@@ -14,6 +14,7 @@ static void ngx_rtmp_close_connection(ngx_connection_t *c);
 static u_char * ngx_rtmp_log_error(ngx_log_t *log, u_char *buf, size_t len);
 
 
+// 主流程，这里是 listening->handler 绑定的函数指针，是负责处理RTMP请求的入口
 // 初始化连接，RTMP握手
 void
 ngx_rtmp_init_connection(ngx_connection_t *c)
@@ -96,7 +97,7 @@ ngx_rtmp_init_connection(ngx_connection_t *c)
             break;
         }
 
-    } else {
+    } else {    // port->naddrs <= 1
         switch (c->local_sockaddr->sa_family) {
 
         case AF_INET6:
@@ -122,19 +123,19 @@ ngx_rtmp_init_connection(ngx_connection_t *c)
         return;
     }
 
-    /* only auto-pushed connections are
-     * done through unix socket */
-
+    /* only auto-pushed connections are done through unix socket */
     s->auto_pushed = unix_socket;
 
     if (addr_conf->proxy_protocol) {
         ngx_rtmp_proxy_protocol(s);
     } else {
+        // RTMP协议握手
         ngx_rtmp_handshake(s);
     }
 }
 
 
+// 初始化 ngx_rtmp_session_t，触发一个 NGX_RTMP_CONNECT 事件
 ngx_rtmp_session_t *
 ngx_rtmp_init_session(ngx_connection_t *c, ngx_rtmp_addr_conf_t *addr_conf)
 {
@@ -195,7 +196,7 @@ ngx_rtmp_init_session(ngx_connection_t *c, ngx_rtmp_addr_conf_t *addr_conf)
     s->buflen = cscf->buflen;
     ngx_rtmp_set_chunk_size(s, NGX_RTMP_DEFAULT_CHUNK_SIZE);
 
-
+    // 触发一个 NGX_RTMP_CONNECT 事件，该事件对应的处理器回调函数都要执行
     if (ngx_rtmp_fire_event(s, NGX_RTMP_CONNECT, NULL, NULL) != NGX_OK) {
         ngx_rtmp_finalize_session(s);
         return NULL;

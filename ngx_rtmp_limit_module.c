@@ -22,7 +22,7 @@ static ngx_int_t ngx_rtmp_limit_postconfiguration(ngx_conf_t *cf);
 static void *ngx_rtmp_limit_create_main_conf(ngx_conf_t *cf);
 
 
-// ZHIWU: 监听connect以及disconnect事件，通过计算连接数量来限制连接个数
+// 监听connect以及disconnect事件，通过计算连接数量来限制连接个数
 
 static ngx_command_t  ngx_rtmp_limit_commands[] = {
 
@@ -82,8 +82,7 @@ ngx_rtmp_limit_create_main_conf(ngx_conf_t *cf)
 
 
 static ngx_int_t
-ngx_rtmp_limit_connect(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-    ngx_chain_t *in)
+ngx_rtmp_limit_connect(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_rtmp_limit_main_conf_t *lmcf;
     ngx_slab_pool_t            *shpool;
@@ -120,8 +119,7 @@ ngx_rtmp_limit_connect(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
 
 static ngx_int_t
-ngx_rtmp_limit_disconnect(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-    ngx_chain_t *in)
+ngx_rtmp_limit_disconnect(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_rtmp_limit_main_conf_t *lmcf;
     ngx_slab_pool_t            *shpool;
@@ -184,6 +182,7 @@ ngx_rtmp_limit_postconfiguration(ngx_conf_t *cf)
 
     cmcf = ngx_rtmp_conf_get_module_main_conf(cf, ngx_rtmp_core_module);
 
+    // 配置 NGX_RTMP_CONNECT 指令的回调函数
     h = ngx_array_push(&cmcf->events[NGX_RTMP_CONNECT]);
     *h = ngx_rtmp_limit_connect;
 

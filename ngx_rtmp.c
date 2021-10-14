@@ -15,6 +15,7 @@
 static char *ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 static ngx_int_t ngx_rtmp_add_ports(ngx_conf_t *cf, ngx_array_t *ports, ngx_rtmp_listen_t *listen);
+
 static char *ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports);
 
 static ngx_int_t ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t *addr);
@@ -73,7 +74,7 @@ ngx_module_t  ngx_rtmp_module = {
 };
 
 
-// 模块配置初始化
+// 模块配置初始化：初始化各项配置，配置 ngx_create_listening
 static char *
 ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
@@ -129,7 +130,9 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
      */
     modules = cf->cycle->modules;
 
-    // 根据modules配置类型，依次执行 create_main_conf, create_srv_conf, create_app_cnf 回调函数
+    // 回调函数：module[i]->ctx->create_main_conf
+    // 回调函数：module[i]->ctx->create_srv_conf
+    // 回调函数：module[i]->ctx->create_app_conf
     for (m = 0; modules[m]; m++) {
         if (modules[m]->type != NGX_RTMP_MODULE) {
             continue;
@@ -196,6 +199,7 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     cmcf = ctx->main_conf[ngx_rtmp_core_module.ctx_index];
     cscfp = cmcf->servers.elts;
 
+    // 回调函数：modules[i]->ctx->init_main_conf
     for (m = 0; modules[m]; m++) {
         if (modules[m]->type != NGX_RTMP_MODULE) {
             continue;
@@ -257,7 +261,9 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
 
-    // 初始化 rtmp events 事件
+
+    // 初始化当接收到 pm_events 数组中包含的 RTMP 消息时调用的回调函数
+    // 支持的 RTMP 消息有 chunk_size、abort、ack、ack_size、bandwidth
     if (ngx_rtmp_init_events(cf, cmcf) != NGX_OK) {
         return NGX_CONF_ERROR;
     }
@@ -283,8 +289,7 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
 
-    if (ngx_array_init(&ports, cf->temp_pool, 4, sizeof(ngx_rtmp_conf_port_t))
-        != NGX_OK)
+    if (ngx_array_init(&ports, cf->temp_pool, 4, sizeof(ngx_rtmp_conf_port_t)) != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }
@@ -340,6 +345,7 @@ ngx_rtmp_merge_applications(ngx_conf_t *cf, ngx_array_t *applications, void **ap
 }
 
 
+// 设置RTMP协议指令和AMF消息指令，初始化内存结构 cmcf->events
 static ngx_int_t
 ngx_rtmp_init_events(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
 {
@@ -361,6 +367,8 @@ ngx_rtmp_init_events(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
 }
 
 
+// 设置RTMP协议指令和AMF消息指令的事件处理器
+// 事件处理器的映射存储cmcf->events组数中，数组下标就是时间类型编号（宏定义中）
 static ngx_int_t
 ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
 {
@@ -409,7 +417,6 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
 
     /* init amf callbacks */
     ngx_array_init(&cmcf->amf_arrays, cf->pool, 1, sizeof(ngx_hash_key_t));
-
     h = cmcf->amf.elts;
     for(n = 0; n < cmcf->amf.nelts; ++n, ++h) {
         ha = cmcf->amf_arrays.elts;
@@ -521,6 +528,7 @@ found:
 }
 
 
+// 设置listening->handler，ngx_rtmp_init_connection()
 static char *
 ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
 {
@@ -539,14 +547,11 @@ ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
         last = port[p].addrs.nelts;
 
         /*
-         * if there is the binding to the "*:port" then we need to bind()
-         * to the "*:port" only and ignore the other bindings
+         * if there is the binding to the "*:port" then we need to bind() to the "*:port" only and ignore the other bindings
          */
-
         if (addr[last - 1].wildcard) {
             addr[last - 1].bind = 1;
             bind_wildcard = 1;
-
         } else {
             bind_wildcard = 0;
         }
@@ -560,16 +565,18 @@ ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
                 continue;
             }
 
+            // 设置scoket的listening
             ls = ngx_create_listening(cf, addr[i].sockaddr, addr[i].socklen);
             if (ls == NULL) {
                 return NGX_CONF_ERROR;
             }
 
             ls->addr_ntop = 1;
+
+            // listening->handler 回调函数，后续请求的处理器
             ls->handler = ngx_rtmp_init_connection;
             ls->pool_size = 4096;
 
-            /* TODO: error_log directive */
             ls->logp = &cf->cycle->new_log;
             ls->log.data = &ls->addr_text;
             ls->log.handler = ngx_accept_log_error;
@@ -657,8 +664,6 @@ ngx_rtmp_add_addrs(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t 
 }
 
 
-#if (NGX_HAVE_INET6)
-
 static ngx_int_t
 ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t *addr)
 {
@@ -699,8 +704,6 @@ ngx_rtmp_add_addrs6(ngx_conf_t *cf, ngx_rtmp_port_t *mport, ngx_rtmp_conf_addr_t
     return NGX_OK;
 }
 
-#endif
-
 
 static ngx_int_t
 ngx_rtmp_cmp_conf_addrs(const void *one, const void *two)
@@ -731,6 +734,7 @@ ngx_rtmp_cmp_conf_addrs(const void *one, const void *two)
 }
 
 
+// 触发一个evt事件，执行各个对应event的回调函数，回调函数是一个数组
 ngx_int_t
 ngx_rtmp_fire_event(ngx_rtmp_session_t *s, ngx_uint_t evt, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
@@ -741,9 +745,12 @@ ngx_rtmp_fire_event(ngx_rtmp_session_t *s, ngx_uint_t evt, ngx_rtmp_header_t *h,
 
     cmcf = ngx_rtmp_get_module_main_conf(s, ngx_rtmp_core_module);
 
+    // 通过evt命令标号，获取event_handler列表
     ch = &cmcf->events[evt];
     hh = ch->elts;
+    // 依次调用handler
     for(n = 0; n < ch->nelts; ++n, ++hh) {
+        // 函数指针，参数列表：ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in
         if (*hh && (*hh)(s, h, in) != NGX_OK) {
             return NGX_ERROR;
         }

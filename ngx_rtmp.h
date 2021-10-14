@@ -36,6 +36,9 @@ typedef struct {
     unsigned                wildcard:1;
     unsigned                so_keepalive:2;
     unsigned                proxy_protocol:1;
+    unsigned                ipv6only:2;
+    unsigned                so_keepalive:2;
+    unsigned                proxy_protocol:1;
 } ngx_rtmp_listen_t;
 
 
@@ -81,6 +84,7 @@ typedef struct {
     unsigned                wildcard:1;
     unsigned                so_keepalive:2;
     unsigned                proxy_protocol:1;
+    unsigned                ipv6only:2;
 } ngx_rtmp_conf_addr_t;
 
 
@@ -236,13 +240,14 @@ typedef struct {
 /* handler result code:
  *  NGX_ERROR - error
  *  NGX_OK    - success, may continue
- *  NGX_DONE  - success, input parsed, reply sent; need no
- *      more calls on this event */
+ *  NGX_DONE  - success, input parsed, reply sent; need no more calls on this event */
 typedef ngx_int_t (*ngx_rtmp_handler_pt)(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
 
 
+// rtmp_amf 消息中指令处理 handler 映射
 typedef struct {
     ngx_str_t               name;
+    // 函数指针，指向具体的指令处理函数，方法定义要足够通用
     ngx_rtmp_handler_pt     handler;
 } ngx_rtmp_amf_handler_t;
 
@@ -251,10 +256,13 @@ typedef struct {
     ngx_array_t             servers;    /* ngx_rtmp_core_srv_conf_t */
     ngx_array_t             listen;     /* ngx_rtmp_listen_t */
 
+    // events[26]
     ngx_array_t             events[NGX_RTMP_MAX_EVENT];
 
     ngx_hash_t              amf_hash;
     ngx_array_t             amf_arrays;
+
+    // ngx_rtmp_amf_handler_t - AMF消息指令的回调函数列表
     ngx_array_t             amf;
 } ngx_rtmp_core_main_conf_t;
 
@@ -323,8 +331,11 @@ typedef struct {
 // RTMP模块类型，ngx_module_t.type的枚举
 #define NGX_RTMP_MODULE                 0x504D5452     /* "RTMP" */
 
+// rtmp 根节点下的配置
 #define NGX_RTMP_MAIN_CONF              0x02000000
+// rtmp.server 节点下的配置
 #define NGX_RTMP_SRV_CONF               0x04000000
+// rtmp.application 节点下的配置
 #define NGX_RTMP_APP_CONF               0x08000000
 #define NGX_RTMP_REC_CONF               0x10000000
 
@@ -522,13 +533,7 @@ extern ngx_rtmp_bandwidth_t                 ngx_rtmp_bw_in;
 
 
 extern ngx_uint_t                           ngx_rtmp_naccepted;
-#if (nginx_version >= 1007011)
 extern ngx_queue_t                          ngx_rtmp_init_queue;
-#elif (nginx_version >= 1007005)
-extern ngx_thread_volatile ngx_queue_t      ngx_rtmp_init_queue;
-#else
-extern ngx_thread_volatile ngx_event_t     *ngx_rtmp_init_queue;
-#endif
 
 extern ngx_uint_t                           ngx_rtmp_max_module;
 extern ngx_module_t                         ngx_rtmp_core_module;

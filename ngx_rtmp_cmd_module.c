@@ -104,6 +104,7 @@ ngx_rtmp_cmd_connect_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain
 
     static ngx_rtmp_connect_t   v;
 
+    // RTMP协议中的指令
     static ngx_rtmp_amf_elt_t  in_cmd[] = {
 
         { NGX_RTMP_AMF_STRING,
@@ -745,8 +746,10 @@ ngx_rtmp_cmd_set_buflen(ngx_rtmp_session_t *s, ngx_rtmp_set_buflen_t *v)
 }
 
 
-// 指令映射：RTMP协议中AMF消息的控制指令，注意这里的方法映射是初始化函数
+// 指令处理器映射：RTMP协议中AMF消息的控制指令
+// 注意这里的方法映射是初始化函数，函数指针
 static ngx_rtmp_amf_handler_t ngx_rtmp_cmd_map[] = {
+    // ngx_string, ngx_rtmp_handler_pt
     { ngx_string("connect"),            ngx_rtmp_cmd_connect_init           },
     { ngx_string("createStream"),       ngx_rtmp_cmd_create_stream_init     },
     { ngx_string("closeStream"),        ngx_rtmp_cmd_close_stream_init      },

@@ -52,7 +52,7 @@ typedef struct {
 } ngx_rtmp_access_app_conf_t;
 
 
-// ZHIWU: 监听play，publish事件，对IP做检查访问
+// 监听play，publish事件，对IP做检查访问
 
 static ngx_command_t  ngx_rtmp_access_commands[] = {
 

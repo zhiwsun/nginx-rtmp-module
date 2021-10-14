@@ -313,8 +313,7 @@ ngx_rtmp_handshake_parse_challenge(ngx_rtmp_session_t *s, ngx_str_t *peer_key, n
     b->pos += offs;
     b->last = b->pos + NGX_RTMP_HANDSHAKE_KEYLEN;
     s->hs_digest = ngx_palloc(s->connection->pool, NGX_RTMP_HANDSHAKE_KEYLEN);
-    if (ngx_rtmp_make_digest(key, b, NULL, s->hs_digest, s->connection->log)
-            != NGX_OK)
+    if (ngx_rtmp_make_digest(key, b, NULL, s->hs_digest, s->connection->log) != NGX_OK)
     {
         return NGX_ERROR;
     }
@@ -345,6 +344,7 @@ ngx_rtmp_handshake_create_response(ngx_rtmp_session_t *s)
 }
 
 
+// RTMP协议握手阶段完成
 static void
 ngx_rtmp_handshake_done(ngx_rtmp_session_t *s)
 {
@@ -414,31 +414,23 @@ ngx_rtmp_handshake_recv(ngx_event_t *rev)
     }
 
     ++s->hs_stage;
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-            "handshake: stage %ui", s->hs_stage);
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handshake: stage %ui", s->hs_stage);
 
     switch (s->hs_stage) {
         case NGX_RTMP_HANDSHAKE_SERVER_SEND_CHALLENGE:
-            if (ngx_rtmp_handshake_parse_challenge(s,
-                    &ngx_rtmp_client_partial_key,
-                    &ngx_rtmp_server_full_key) != NGX_OK)
+            if (ngx_rtmp_handshake_parse_challenge(s, &ngx_rtmp_client_partial_key, &ngx_rtmp_server_full_key) != NGX_OK)
             {
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                        "handshake: error parsing challenge");
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "handshake: error parsing challenge");
                 ngx_rtmp_finalize_session(s);
                 return;
             }
             if (s->hs_old) {
-                ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                        "handshake: old-style challenge");
+                ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handshake: old-style challenge");
                 s->hs_buf->pos = s->hs_buf->start;
                 s->hs_buf->last = s->hs_buf->end;
-            } else if (ngx_rtmp_handshake_create_challenge(s,
-                        ngx_rtmp_server_version,
-                        &ngx_rtmp_server_partial_key) != NGX_OK)
+            } else if (ngx_rtmp_handshake_create_challenge(s, ngx_rtmp_server_version, &ngx_rtmp_server_partial_key) != NGX_OK)
             {
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                        "handshake: error creating challenge");
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "handshake: error creating challenge");
                 ngx_rtmp_finalize_session(s);
                 return;
             }
@@ -450,12 +442,9 @@ ngx_rtmp_handshake_recv(ngx_event_t *rev)
             break;
 
         case NGX_RTMP_HANDSHAKE_CLIENT_RECV_RESPONSE:
-            if (ngx_rtmp_handshake_parse_challenge(s,
-                    &ngx_rtmp_server_partial_key,
-                    &ngx_rtmp_client_full_key) != NGX_OK)
+            if (ngx_rtmp_handshake_parse_challenge(s, &ngx_rtmp_server_partial_key, &ngx_rtmp_client_full_key) != NGX_OK)
             {
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                        "handshake: error parsing challenge");
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "handshake: error parsing challenge");
                 ngx_rtmp_finalize_session(s);
                 return;
             }
@@ -465,8 +454,7 @@ ngx_rtmp_handshake_recv(ngx_event_t *rev)
 
         case NGX_RTMP_HANDSHAKE_CLIENT_SEND_RESPONSE:
             if (ngx_rtmp_handshake_create_response(s) != NGX_OK) {
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                        "handshake: response error");
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "handshake: response error");
                 ngx_rtmp_finalize_session(s);
                 return;
             }
@@ -565,7 +553,7 @@ ngx_rtmp_handshake_send(ngx_event_t *wev)
 }
 
 
-// RTMP连接握手
+// RTMP协议握手入口
 void
 ngx_rtmp_handshake(ngx_rtmp_session_t *s)
 {
@@ -593,15 +581,12 @@ ngx_rtmp_client_handshake(ngx_rtmp_session_t *s, unsigned async)
     c->read->handler =  ngx_rtmp_handshake_recv;
     c->write->handler = ngx_rtmp_handshake_send;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-            "handshake: start client handshake");
+    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handshake: start client handshake");
 
     s->hs_buf = ngx_rtmp_alloc_handshake_buffer(s);
     s->hs_stage = NGX_RTMP_HANDSHAKE_CLIENT_SEND_CHALLENGE;
 
-    if (ngx_rtmp_handshake_create_challenge(s,
-                ngx_rtmp_client_version,
-                &ngx_rtmp_client_partial_key) != NGX_OK)
+    if (ngx_rtmp_handshake_create_challenge(s, ngx_rtmp_client_version, &ngx_rtmp_client_partial_key) != NGX_OK)
     {
         ngx_rtmp_finalize_session(s);
         return;

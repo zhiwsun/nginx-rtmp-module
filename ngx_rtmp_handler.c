@@ -80,12 +80,15 @@ ngx_rtmp_user_message_type(uint16_t evt)
 #endif
 
 
+// 启动 ngx_rtmp_cycle
 void
 ngx_rtmp_cycle(ngx_rtmp_session_t *s)
 {
     ngx_connection_t           *c;
 
     c = s->connection;
+
+    // 设置读写的handler
     c->read->handler =  ngx_rtmp_recv;
     c->write->handler = ngx_rtmp_send;
 
@@ -188,6 +191,7 @@ ngx_rtmp_ping(ngx_event_t *pev)
 }
 
 
+// 接收 ngx_event_t 消息，组装RTMP完整消息
 static void
 ngx_rtmp_recv(ngx_event_t *rev)
 {
@@ -215,6 +219,7 @@ ngx_rtmp_recv(ngx_event_t *rev)
         return;
     }
 
+    // RTMP接收数据主循环
     for( ;; ) {
 
         st = &s->in_streams[s->in_csid];
@@ -223,8 +228,7 @@ ngx_rtmp_recv(ngx_event_t *rev)
         if (st->in == NULL) {
             st->in = ngx_rtmp_alloc_in_buf(s);
             if (st->in == NULL) {
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                        "in buf alloc failed");
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "in buf alloc failed");
                 ngx_rtmp_finalize_session(s);
                 return;
             }
@@ -236,8 +240,7 @@ ngx_rtmp_recv(ngx_event_t *rev)
 
         if (old_size) {
 
-            ngx_log_debug1(NGX_LOG_DEBUG_RTMP, c->log, 0,
-                    "reusing formerly read data: %d", old_size);
+            ngx_log_debug1(NGX_LOG_DEBUG_RTMP, c->log, 0, "reusing formerly read data: %d", old_size);
 
             b->pos = b->start;
 
@@ -274,8 +277,7 @@ ngx_rtmp_recv(ngx_event_t *rev)
             s->in_bytes += n;
 
             if (s->in_bytes >= 0xf0000000) {
-                ngx_log_debug0(NGX_LOG_DEBUG_RTMP, c->log, 0,
-                               "resetting byte counter");
+                ngx_log_debug0(NGX_LOG_DEBUG_RTMP, c->log, 0, "resetting byte counter");
                 s->in_bytes = 0;
                 s->in_last_ack = 0;
             }
@@ -284,8 +286,7 @@ ngx_rtmp_recv(ngx_event_t *rev)
 
                 s->in_last_ack = s->in_bytes;
 
-                ngx_log_debug1(NGX_LOG_DEBUG_RTMP, c->log, 0,
-                        "sending RTMP ACK(%uD)", s->in_bytes);
+                ngx_log_debug1(NGX_LOG_DEBUG_RTMP, c->log, 0, "sending RTMP ACK(%uD)", s->in_bytes);
 
                 if (ngx_rtmp_send_ack(s, s->in_bytes)) {
                     ngx_rtmp_finalize_session(s);
@@ -319,14 +320,10 @@ ngx_rtmp_recv(ngx_event_t *rev)
                 csid += (uint32_t)256 * (*(uint8_t*)p++);
             }
 
-            ngx_log_debug2(NGX_LOG_DEBUG_RTMP, c->log, 0,
-                    "RTMP bheader fmt=%d csid=%D",
-                    (int)fmt, csid);
+            ngx_log_debug2(NGX_LOG_DEBUG_RTMP, c->log, 0, "RTMP bheader fmt=%d csid=%D", (int)fmt, csid);
 
             if (csid >= (uint32_t)cscf->max_streams) {
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                    "RTMP in chunk stream too big: %D >= %D",
-                    csid, cscf->max_streams);
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "RTMP in chunk stream too big: %D >= %D", csid, cscf->max_streams);
                 ngx_rtmp_finalize_session(s);
                 return;
             }
@@ -430,8 +427,7 @@ ngx_rtmp_recv(ngx_event_t *rev)
             b->pos = p;
 
             if (h->mlen > cscf->max_message) {
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                        "too big message: %uz", cscf->max_message);
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "too big message: %uz", cscf->max_message);
                 ngx_rtmp_finalize_session(s);
                 return;
             }
@@ -483,7 +479,7 @@ ngx_rtmp_recv(ngx_event_t *rev)
         }
 
         s->in_csid = 0;
-    }
+    }   // for (;;)
 }
 
 
@@ -704,9 +700,9 @@ ngx_rtmp_prepare_message(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_rtmp_h
 }
 
 
+// 发送RTMP消息
 ngx_int_t
-ngx_rtmp_send_message(ngx_rtmp_session_t *s, ngx_chain_t *out,
-        ngx_uint_t priority)
+ngx_rtmp_send_message(ngx_rtmp_session_t *s, ngx_chain_t *out, ngx_uint_t priority)
 {
     ngx_uint_t                      nmsg;
 
@@ -747,9 +743,9 @@ ngx_rtmp_send_message(ngx_rtmp_session_t *s, ngx_chain_t *out,
 }
 
 
+// 接收RTMP消息
 ngx_int_t
-ngx_rtmp_receive_message(ngx_rtmp_session_t *s,
-        ngx_rtmp_header_t *h, ngx_chain_t *in)
+ngx_rtmp_receive_message(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_rtmp_core_main_conf_t  *cmcf;
     ngx_array_t                *evhs;
@@ -775,29 +771,27 @@ ngx_rtmp_receive_message(ngx_rtmp_session_t *s,
     }
 #endif
 
+    // 收到的消息头 h->type 不合符RTMP消息类型，丢弃
     if (h->type > NGX_RTMP_MSG_MAX) {
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                "unexpected RTMP message type: %d", (int)h->type);
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "unexpected RTMP message type: %d", (int)h->type);
         return NGX_OK;
     }
 
+    // 获取到消息指令的处理器链，ngx_array_t
     evhs = &cmcf->events[h->type];
     evh = evhs->elts;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-            "nhandlers: %d", evhs->nelts);
-
+    // 依次处理接收到的消息
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "nhandlers: %d", evhs->nelts);
     for(n = 0; n < evhs->nelts; ++n, ++evh) {
         if (!evh) {
             continue;
         }
-        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                "calling handler %d", n);
+        ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "calling handler %d", n);
 
         switch ((*evh)(s, h, in)) {
             case NGX_ERROR:
-                ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                        "handler %d failed", n);
+                ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handler %d failed", n);
                 return NGX_ERROR;
             case NGX_DONE:
                 return NGX_OK;
