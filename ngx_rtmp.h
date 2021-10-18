@@ -157,8 +157,15 @@ typedef struct {
 #define NGX_RTMP_MAX_CHUNK_HEADER       18
 
 
+// RTMP协议头部
+// +--------------+----------------+--------------------+--------------+
+// | Basic Header | Message Header | Extended Timestamp |  Chunk Data  |
+// +--------------+----------------+--------------------+--------------+
+// |<------------------- Chunk Header ----------------->|
 typedef struct {
+    // basic_header: fmt + csid
     uint32_t                csid;       /* chunk stream id */
+    // message_header: timestamp, mlen, message_type, msid
     uint32_t                timestamp;  /* timestamp (delta) */
     uint32_t                mlen;       /* message length */
     uint8_t                 type;       /* message type id */
