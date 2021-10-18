@@ -19,37 +19,28 @@ static ngx_rtmp_seek_pt                 next_seek;
 static ngx_rtmp_pause_pt                next_pause;
 
 
-static char *ngx_rtmp_play_url(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
+static char *ngx_rtmp_play_url(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static void *ngx_rtmp_play_create_main_conf(ngx_conf_t *cf);
 static ngx_int_t ngx_rtmp_play_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_play_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_play_merge_app_conf(ngx_conf_t *cf,
-       void *parent, void *child);
+static char * ngx_rtmp_play_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 
 static ngx_int_t ngx_rtmp_play_do_init(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_play_do_done(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_play_do_start(ngx_rtmp_session_t *s);
 static ngx_int_t ngx_rtmp_play_do_stop(ngx_rtmp_session_t *s);
-static ngx_int_t ngx_rtmp_play_do_seek(ngx_rtmp_session_t *s,
-                                       ngx_uint_t timestamp);
+static ngx_int_t ngx_rtmp_play_do_seek(ngx_rtmp_session_t *s, ngx_uint_t timestamp);
 
 static ngx_int_t ngx_rtmp_play_play(ngx_rtmp_session_t *s, ngx_rtmp_play_t *v);
 static ngx_int_t ngx_rtmp_play_seek(ngx_rtmp_session_t *s, ngx_rtmp_seek_t *v);
-static ngx_int_t ngx_rtmp_play_pause(ngx_rtmp_session_t *s,
-                                     ngx_rtmp_pause_t *v);
+static ngx_int_t ngx_rtmp_play_pause(ngx_rtmp_session_t *s, ngx_rtmp_pause_t *v);
 static void ngx_rtmp_play_send(ngx_event_t *e);
 static ngx_int_t ngx_rtmp_play_open(ngx_rtmp_session_t *s, double start);
-static ngx_int_t ngx_rtmp_play_remote_handle(ngx_rtmp_session_t *s,
-       void *arg, ngx_chain_t *in);
-static ngx_chain_t * ngx_rtmp_play_remote_create(ngx_rtmp_session_t *s,
-       void *arg, ngx_pool_t *pool);
-static ngx_int_t ngx_rtmp_play_open_remote(ngx_rtmp_session_t *s,
-       ngx_rtmp_play_t *v);
-static ngx_int_t ngx_rtmp_play_next_entry(ngx_rtmp_session_t *s,
-       ngx_rtmp_play_t *v);
-static ngx_rtmp_play_entry_t * ngx_rtmp_play_get_current_entry(
-       ngx_rtmp_session_t *s);
+static ngx_int_t ngx_rtmp_play_remote_handle(ngx_rtmp_session_t *s, void *arg, ngx_chain_t *in);
+static ngx_chain_t * ngx_rtmp_play_remote_create(ngx_rtmp_session_t *s, void *arg, ngx_pool_t *pool);
+static ngx_int_t ngx_rtmp_play_open_remote(ngx_rtmp_session_t *s, ngx_rtmp_play_t *v);
+static ngx_int_t ngx_rtmp_play_next_entry(ngx_rtmp_session_t *s, ngx_rtmp_play_t *v);
+static ngx_rtmp_play_entry_t * ngx_rtmp_play_get_current_entry( ngx_rtmp_session_t *s);
 static void ngx_rtmp_play_cleanup_local_file(ngx_rtmp_session_t *s);
 static void ngx_rtmp_play_copy_local_file(ngx_rtmp_session_t *s, u_char *name);
 static u_char * ngx_rtmp_play_get_local_file_path(ngx_rtmp_session_t *s);
@@ -1189,8 +1180,7 @@ ngx_rtmp_play_url(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     size_t                          add, n;
     ngx_str_t                      *value;
 
-    if (pacf->entries.nalloc == 0 &&
-        ngx_array_init(&pacf->entries, cf->pool, 1, sizeof(void *)) != NGX_OK)
+    if (pacf->entries.nalloc == 0 && ngx_array_init(&pacf->entries, cf->pool, 1, sizeof(void *)) != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }

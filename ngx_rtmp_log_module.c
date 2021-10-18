@@ -977,8 +977,7 @@ ngx_rtmp_log_postconfiguration(ngx_conf_t *cf)
         *value = ngx_rtmp_combined_fmt;
         fmt = lmcf->formats.elts;
 
-        if (ngx_rtmp_log_compile_format(cf, fmt->ops, &a, 0)
-            != NGX_CONF_OK)
+        if (ngx_rtmp_log_compile_format(cf, fmt->ops, &a, 0) != NGX_CONF_OK)
         {
             return NGX_ERROR;
         }

@@ -208,20 +208,24 @@ ngx_rtmp_recv(ngx_event_t *rev)
     uint8_t                     fmt, ext;
     uint32_t                    csid, timestamp;
 
+    // ngx_connection_t
     c = rev->data;
+    // ngx_rtmp_session_t
     s = c->data;
     b = NULL;
     old_pos = NULL;
     old_size = 0;
     cscf = ngx_rtmp_get_module_srv_conf(s, ngx_rtmp_core_module);
 
+    // ngx_connection_t 连接状态有效
     if (c->destroyed) {
         return;
     }
 
-    // RTMP接收数据主循环
+    // 接收数据主循环
     for( ;; ) {
 
+        // ngx_rtmp_stream_t 多路复用
         st = &s->in_streams[s->in_csid];
 
         /* allocate new buffer */
@@ -235,6 +239,8 @@ ngx_rtmp_recv(ngx_event_t *rev)
         }
 
         h  = &st->hdr;
+
+        // ngx_chain_t 处理链
         in = st->in;
         b  = in->buf;
 
@@ -771,24 +777,24 @@ ngx_rtmp_receive_message(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_
     }
 #endif
 
-    // 收到的消息头 h->type 不合符RTMP消息类型，丢弃
+    // 上游会按照RTMP协议解析消息头部 h，其中 h->type 为消息类型
+    // 此处首先过滤掉不合规消息类型
+    // 再通过已经配置并解析完成的 event -> handlers 映射获取处理器 evhs
+    // evhs 是一个动态数组，每个元素都是一个函数指针；遍历整个动态数组，依次执行回调函数函数指针
+
     if (h->type > NGX_RTMP_MSG_MAX) {
         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "unexpected RTMP message type: %d", (int)h->type);
         return NGX_OK;
     }
 
-    // 获取到消息指令的处理器链，ngx_array_t
     evhs = &cmcf->events[h->type];
     evh = evhs->elts;
-
-    // 依次处理接收到的消息
     ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "nhandlers: %d", evhs->nelts);
     for(n = 0; n < evhs->nelts; ++n, ++evh) {
         if (!evh) {
             continue;
         }
         ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "calling handler %d", n);
-
         switch ((*evh)(s, h, in)) {
             case NGX_ERROR:
                 ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handler %d failed", n);

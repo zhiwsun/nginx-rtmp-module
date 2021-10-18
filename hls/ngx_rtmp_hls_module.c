@@ -1672,9 +1672,9 @@ ngx_rtmp_hls_flush_audio(ngx_rtmp_session_t *s)
 }
 
 
+// 回调函数：NGX_RTMP_MSG_AUDIO | NGX_RTMP_MSG_VIDEO
 static ngx_int_t
-ngx_rtmp_hls_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-    ngx_chain_t *in)
+ngx_rtmp_hls_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_rtmp_hls_app_conf_t        *hacf;
     ngx_rtmp_hls_ctx_t             *ctx;
@@ -1692,14 +1692,12 @@ ngx_rtmp_hls_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
     codec_ctx = ngx_rtmp_get_module_ctx(s, ngx_rtmp_codec_module);
 
-    if (hacf == NULL || !hacf->hls || ctx == NULL ||
-        codec_ctx == NULL  || h->mlen < 2)
+    if (hacf == NULL || !hacf->hls || ctx == NULL || codec_ctx == NULL  || h->mlen < 2)
     {
         return NGX_OK;
     }
 
-    if (codec_ctx->audio_codec_id != NGX_RTMP_AUDIO_AAC ||
-        codec_ctx->aac_header == NULL || ngx_rtmp_is_codec_header(in))
+    if (codec_ctx->audio_codec_id != NGX_RTMP_AUDIO_AAC || codec_ctx->aac_header == NULL || ngx_rtmp_is_codec_header(in))
     {
         return NGX_OK;
     }
@@ -1728,8 +1726,7 @@ ngx_rtmp_hls_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
     pts = (uint64_t) h->timestamp * 90;
 
     if (b->start + size > b->end) {
-        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
-                      "hls: too big audio frame");
+        ngx_log_error(NGX_LOG_ERR, s->connection->log, 0, "hls: too big audio frame");
         return NGX_OK;
     }
 
@@ -1834,8 +1831,7 @@ ngx_rtmp_hls_audio(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
 
 static ngx_int_t
-ngx_rtmp_hls_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-    ngx_chain_t *in)
+ngx_rtmp_hls_video(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_rtmp_hls_app_conf_t        *hacf;
     ngx_rtmp_hls_ctx_t             *ctx;

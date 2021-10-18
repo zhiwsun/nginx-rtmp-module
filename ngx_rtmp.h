@@ -37,8 +37,6 @@ typedef struct {
     unsigned                so_keepalive:2;
     unsigned                proxy_protocol:1;
     unsigned                ipv6only:2;
-    unsigned                so_keepalive:2;
-    unsigned                proxy_protocol:1;
 } ngx_rtmp_listen_t;
 
 
@@ -96,24 +94,42 @@ typedef struct {
 
 
 /* RTMP message types */
+// 0x01 通知对端，更新最大可接受ChunkSize的大小，默认128 bytes
 #define NGX_RTMP_MSG_CHUNK_SIZE         1
+// 0x02 通知对端，终止处理指定<csid>信道的后续消息
 #define NGX_RTMP_MSG_ABORT              2
+// 0x03 由 receiver 发送，当首次收到数据大小等于 WindowsAckSize 消息设置的窗口大小时发送给 sender，连接稳定
 #define NGX_RTMP_MSG_ACK                3
+// 0x04 用户控制消息
 #define NGX_RTMP_MSG_USER               4
+// 0x05 由 sender 发送，用来设定 receiver 首次有效数据传输到来之后，用于等待确定传输稳定的窗口大小，单位 bytes
 #define NGX_RTMP_MSG_ACK_SIZE           5
+// 0x06 有 receiver 发送，根据已经收到但未确认的消息数量来通知 sender 控制发送带宽，收到消息须要发送 WindowAckSize 应答
 #define NGX_RTMP_MSG_BANDWIDTH          6
+// 0x07
 #define NGX_RTMP_MSG_EDGE               7
+// 0x08 RTMP音频数据包
 #define NGX_RTMP_MSG_AUDIO              8
+// 0x09 RTMP视频数据包
 #define NGX_RTMP_MSG_VIDEO              9
+// 0x0F AMF3编码消息，音视频 MetaData 消息，配置详情
 #define NGX_RTMP_MSG_AMF3_META          15
+// 0x10 AMF3编码消息，共享对象消息（携带用户详情）
 #define NGX_RTMP_MSG_AMF3_SHARED        16
+// 0x11 AMF3编码消息，RTMP命令消息，可能涉及用户数据
 #define NGX_RTMP_MSG_AMF3_CMD           17
+// 0x12 AFM0编码消息，音视频 MetaData 消息，配置详情
 #define NGX_RTMP_MSG_AMF_META           18
+// 0x13 AMF0编码消息，共享对象消息（携带用户详情）
 #define NGX_RTMP_MSG_AMF_SHARED         19
+// 0x14 AMF0编码消息，RTMP命令消息，可能涉及用户数据
 #define NGX_RTMP_MSG_AMF_CMD            20
+// 0x16 整合消息
 #define NGX_RTMP_MSG_AGGREGATE          22
+//
 #define NGX_RTMP_MSG_MAX                22
 
+// 消息块最大大小，单位bytes
 #define NGX_RTMP_MAX_CHUNK_SIZE         10485760
 
 #define NGX_RTMP_CONNECT                NGX_RTMP_MSG_MAX + 1
@@ -237,10 +253,14 @@ typedef struct {
 } ngx_rtmp_session_t;
 
 
-/* handler result code:
+/*
+ * RTMP事件处理函数
+ *
+ * handler result code:
  *  NGX_ERROR - error
  *  NGX_OK    - success, may continue
- *  NGX_DONE  - success, input parsed, reply sent; need no more calls on this event */
+ *  NGX_DONE  - success, input parsed, reply sent; need no more calls on this event
+ */
 typedef ngx_int_t (*ngx_rtmp_handler_pt)(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
 
 
@@ -255,13 +275,11 @@ typedef struct {
 typedef struct {
     ngx_array_t             servers;    /* ngx_rtmp_core_srv_conf_t */
     ngx_array_t             listen;     /* ngx_rtmp_listen_t */
-
     // events[26]
     ngx_array_t             events[NGX_RTMP_MAX_EVENT];
 
     ngx_hash_t              amf_hash;
     ngx_array_t             amf_arrays;
-
     // ngx_rtmp_amf_handler_t - AMF消息指令的回调函数列表
     ngx_array_t             amf;
 } ngx_rtmp_core_main_conf_t;
@@ -311,7 +329,7 @@ typedef struct {
 } ngx_rtmp_error_log_ctx_t;
 
 
-// RTMP配置相关回调函数，可以理解为 ngx_module_t 的扩展字段
+// RTMP模块定义的一些通用的回调函数埋点
 typedef struct {
     // ngx_rtmp.c # ngx_rtmp_block
     ngx_int_t             (*preconfiguration)(ngx_conf_t *cf);
@@ -331,11 +349,11 @@ typedef struct {
 // RTMP模块类型，ngx_module_t.type的枚举
 #define NGX_RTMP_MODULE                 0x504D5452     /* "RTMP" */
 
-// rtmp 根节点下的配置
+// rtmp{} 根节点下的配置
 #define NGX_RTMP_MAIN_CONF              0x02000000
-// rtmp.server 节点下的配置
+// rtmp.server{}
 #define NGX_RTMP_SRV_CONF               0x04000000
-// rtmp.application 节点下的配置
+// rtmp.application{}
 #define NGX_RTMP_APP_CONF               0x08000000
 #define NGX_RTMP_REC_CONF               0x10000000
 
@@ -380,12 +398,12 @@ void ngx_rtmp_cycle(ngx_rtmp_session_t *s);
 void ngx_rtmp_reset_ping(ngx_rtmp_session_t *s);
 ngx_int_t ngx_rtmp_fire_event(ngx_rtmp_session_t *s, ngx_uint_t evt, ngx_rtmp_header_t *h, ngx_chain_t *in);
 
-
 ngx_int_t ngx_rtmp_set_chunk_size(ngx_rtmp_session_t *s, ngx_uint_t size);
 
 
 /* Bit reverse: we need big-endians in many places  */
 void * ngx_rtmp_rmemcpy(void *dst, const void* src, size_t n);
+
 
 #define ngx_rtmp_rcpymem(dst, src, n) \
     (((u_char*)ngx_rtmp_rmemcpy(dst, src, n)) + (n))
@@ -412,7 +430,7 @@ ngx_rtmp_r64(uint64_t n)
 }
 
 
-/* Receiving messages */
+// 接收消息
 ngx_int_t ngx_rtmp_receive_message(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
 ngx_int_t ngx_rtmp_protocol_message_handler(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
 ngx_int_t ngx_rtmp_user_message_handler(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
@@ -448,20 +466,18 @@ ngx_chain_t * ngx_rtmp_append_shared_bufs(ngx_rtmp_core_srv_conf_t *cscf, ngx_ch
     ngx_rtmp_ref_get(in);                   \
 
 
-/* Sending messages */
+// 发送消息
 void ngx_rtmp_prepare_message(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_rtmp_header_t *lh, ngx_chain_t *out);
 ngx_int_t ngx_rtmp_send_message(ngx_rtmp_session_t *s, ngx_chain_t *out, ngx_uint_t priority);
 
-/* Note on priorities:
- * the bigger value the lower the priority.
- * priority=0 is the highest */
 
-
+// 注意这里的优先级，priority = 0 优先级最高
 #define NGX_RTMP_LIMIT_SOFT         0
 #define NGX_RTMP_LIMIT_HARD         1
 #define NGX_RTMP_LIMIT_DYNAMIC      2
 
-/* Protocol control messages */
+
+// 协议控制消息
 ngx_chain_t * ngx_rtmp_create_chunk_size(ngx_rtmp_session_t *s, uint32_t chunk_size);
 ngx_chain_t * ngx_rtmp_create_abort(ngx_rtmp_session_t *s, uint32_t csid);
 ngx_chain_t * ngx_rtmp_create_ack(ngx_rtmp_session_t *s, uint32_t seq);
@@ -474,7 +490,8 @@ ngx_int_t ngx_rtmp_send_ack(ngx_rtmp_session_t *s, uint32_t seq);
 ngx_int_t ngx_rtmp_send_ack_size(ngx_rtmp_session_t *s, uint32_t ack_size);
 ngx_int_t ngx_rtmp_send_bandwidth(ngx_rtmp_session_t *s, uint32_t ack_size, uint8_t limit_type);
 
-/* User control messages */
+
+// 用户控制消息
 ngx_chain_t * ngx_rtmp_create_stream_begin(ngx_rtmp_session_t *s, uint32_t msid);
 ngx_chain_t * ngx_rtmp_create_stream_eof(ngx_rtmp_session_t *s, uint32_t msid);
 ngx_chain_t * ngx_rtmp_create_stream_dry(ngx_rtmp_session_t *s, uint32_t msid);
@@ -491,7 +508,8 @@ ngx_int_t ngx_rtmp_send_recorded(ngx_rtmp_session_t *s, uint32_t msid);
 ngx_int_t ngx_rtmp_send_ping_request(ngx_rtmp_session_t *s, uint32_t timestamp);
 ngx_int_t ngx_rtmp_send_ping_response(ngx_rtmp_session_t *s, uint32_t timestamp);
 
-/* AMF sender/receiver */
+
+// AMF消息发送/接收
 ngx_int_t ngx_rtmp_append_amf(ngx_rtmp_session_t *s, ngx_chain_t **first, ngx_chain_t **last, ngx_rtmp_amf_elt_t *elts, size_t nelts);
 ngx_int_t ngx_rtmp_receive_amf(ngx_rtmp_session_t *s, ngx_chain_t *in, ngx_rtmp_amf_elt_t *elts, size_t nelts);
 

@@ -748,11 +748,12 @@ ngx_rtmp_fire_event(ngx_rtmp_session_t *s, ngx_uint_t evt, ngx_rtmp_header_t *h,
     cmcf = ngx_rtmp_get_module_main_conf(s, ngx_rtmp_core_module);
 
     // 通过evt命令标号，获取event_handler列表
+    // ch 是一个动态数组；hh 获取到数组首地址后依次遍历函数指针执行
+    // typedef ngx_int_t (*ngx_rtmp_handler_pt)(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
+
     ch = &cmcf->events[evt];
     hh = ch->elts;
-    // 依次调用handler
     for(n = 0; n < ch->nelts; ++n, ++hh) {
-        // 函数指针，参数列表：ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in
         if (*hh && (*hh)(s, h, in) != NGX_OK) {
             return NGX_ERROR;
         }

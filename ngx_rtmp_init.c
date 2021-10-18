@@ -196,7 +196,7 @@ ngx_rtmp_init_session(ngx_connection_t *c, ngx_rtmp_addr_conf_t *addr_conf)
     s->buflen = cscf->buflen;
     ngx_rtmp_set_chunk_size(s, NGX_RTMP_DEFAULT_CHUNK_SIZE);
 
-    // 触发一个 NGX_RTMP_CONNECT 事件，该事件对应的处理器回调函数都要执行
+    // 触发一个 NGX_RTMP_CONNECT 事件
     if (ngx_rtmp_fire_event(s, NGX_RTMP_CONNECT, NULL, NULL) != NGX_OK) {
         ngx_rtmp_finalize_session(s);
         return NULL;

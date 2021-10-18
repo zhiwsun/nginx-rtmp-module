@@ -14,12 +14,10 @@
 
 static char *ngx_rtmp_control(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static void * ngx_rtmp_control_create_loc_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_control_merge_loc_conf(ngx_conf_t *cf,
-    void *parent, void *child);
+static char * ngx_rtmp_control_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 
 
-typedef const char * (*ngx_rtmp_control_handler_t)(ngx_http_request_t *r,
-    ngx_rtmp_session_t *);
+typedef const char * (*ngx_rtmp_control_handler_t)(ngx_http_request_t *r, ngx_rtmp_session_t *);
 
 
 #define NGX_RTMP_CONTROL_ALL        0xff
@@ -336,7 +334,7 @@ ngx_rtmp_control_walk_app(ngx_http_request_t *r,
     }
 
     for (ls = lacf->streams[ngx_hash_key(name.data, name.len) % lacf->nbuckets];
-         ls; ls = ls->next) 
+         ls; ls = ls->next)
     {
         len = ngx_strlen(ls->name);
         if (name.len != len || ngx_strncmp(name.data, ls->name, name.len)) {

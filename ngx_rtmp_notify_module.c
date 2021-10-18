@@ -22,25 +22,18 @@ static ngx_rtmp_close_stream_pt                 next_close_stream;
 static ngx_rtmp_record_done_pt                  next_record_done;
 
 
-static char *ngx_rtmp_notify_on_srv_event(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
-static char *ngx_rtmp_notify_on_app_event(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
-static char *ngx_rtmp_notify_method(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
+static char *ngx_rtmp_notify_on_srv_event(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_rtmp_notify_on_app_event(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_rtmp_notify_method(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_rtmp_notify_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_notify_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_notify_merge_app_conf(ngx_conf_t *cf,
-       void *parent, void *child);
+static char * ngx_rtmp_notify_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
 static void *ngx_rtmp_notify_create_srv_conf(ngx_conf_t *cf);
-static char *ngx_rtmp_notify_merge_srv_conf(ngx_conf_t *cf, void *parent,
-       void *child);
-static ngx_int_t ngx_rtmp_notify_done(ngx_rtmp_session_t *s, char *cbname,
-       ngx_uint_t url_idx);
+static char *ngx_rtmp_notify_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child);
+static ngx_int_t ngx_rtmp_notify_done(ngx_rtmp_session_t *s, char *cbname, ngx_uint_t url_idx);
 
 
-ngx_str_t   ngx_rtmp_notify_urlencoded =
-            ngx_string("application/x-www-form-urlencoded");
+ngx_str_t   ngx_rtmp_notify_urlencoded = ngx_string("application/x-www-form-urlencoded");
 
 
 #define NGX_RTMP_NOTIFY_PUBLISHING              0x01
