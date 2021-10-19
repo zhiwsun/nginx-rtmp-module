@@ -1641,6 +1641,7 @@ ngx_rtmp_relay_postconfiguration(ngx_conf_t *cf)
     next_close_stream = ngx_rtmp_close_stream;
     ngx_rtmp_close_stream = ngx_rtmp_relay_close_stream;
 
+    // 回调函数：注册事件响应处理的函数，_result, _error, onStatus
 
     ch = ngx_array_push(&cmcf->amf);
     ngx_str_set(&ch->name, "_result");

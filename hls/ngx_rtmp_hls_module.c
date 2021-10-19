@@ -2235,8 +2235,7 @@ ngx_rtmp_hls_variant(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     value = cf->args->elts;
 
     if (hacf->variant == NULL) {
-        hacf->variant = ngx_array_create(cf->pool, 1,
-                                         sizeof(ngx_rtmp_hls_variant_t));
+        hacf->variant = ngx_array_create(cf->pool, 1, sizeof(ngx_rtmp_hls_variant_t));
         if (hacf->variant == NULL) {
             return NGX_CONF_ERROR;
         }
@@ -2255,9 +2254,7 @@ ngx_rtmp_hls_variant(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_OK;
     }
 
-    if (ngx_array_init(&var->args, cf->pool, cf->args->nelts - 2,
-                       sizeof(ngx_str_t))
-        != NGX_OK)
+    if (ngx_array_init(&var->args, cf->pool, cf->args->nelts - 2, sizeof(ngx_str_t)) != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }
@@ -2316,23 +2313,17 @@ ngx_rtmp_hls_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
 
     ngx_conf_merge_value(conf->hls, prev->hls, 0);
     ngx_conf_merge_msec_value(conf->fraglen, prev->fraglen, 5000);
-    ngx_conf_merge_msec_value(conf->max_fraglen, prev->max_fraglen,
-                              conf->fraglen * 10);
+    ngx_conf_merge_msec_value(conf->max_fraglen, prev->max_fraglen, conf->fraglen * 10);
     ngx_conf_merge_msec_value(conf->muxdelay, prev->muxdelay, 700);
     ngx_conf_merge_msec_value(conf->sync, prev->sync, 2);
     ngx_conf_merge_msec_value(conf->playlen, prev->playlen, 30000);
     ngx_conf_merge_value(conf->continuous, prev->continuous, 1);
     ngx_conf_merge_value(conf->nested, prev->nested, 0);
-    ngx_conf_merge_uint_value(conf->naming, prev->naming,
-                              NGX_RTMP_HLS_NAMING_SEQUENTIAL);
-    ngx_conf_merge_uint_value(conf->slicing, prev->slicing,
-                              NGX_RTMP_HLS_SLICING_PLAIN);
-    ngx_conf_merge_uint_value(conf->type, prev->type,
-                              NGX_RTMP_HLS_TYPE_LIVE);
-    ngx_conf_merge_msec_value(conf->max_audio_delay, prev->max_audio_delay,
-                              300);
-    ngx_conf_merge_size_value(conf->audio_buffer_size, prev->audio_buffer_size,
-                              NGX_RTMP_HLS_BUFSIZE);
+    ngx_conf_merge_uint_value(conf->naming, prev->naming, NGX_RTMP_HLS_NAMING_SEQUENTIAL);
+    ngx_conf_merge_uint_value(conf->slicing, prev->slicing, NGX_RTMP_HLS_SLICING_PLAIN);
+    ngx_conf_merge_uint_value(conf->type, prev->type, NGX_RTMP_HLS_TYPE_LIVE);
+    ngx_conf_merge_msec_value(conf->max_audio_delay, prev->max_audio_delay, 300);
+    ngx_conf_merge_size_value(conf->audio_buffer_size, prev->audio_buffer_size, NGX_RTMP_HLS_BUFSIZE);
     ngx_conf_merge_value(conf->cleanup, prev->cleanup, 1);
     ngx_conf_merge_str_value(conf->base_url, prev->base_url, "");
     ngx_conf_merge_value(conf->granularity, prev->granularity, 0);

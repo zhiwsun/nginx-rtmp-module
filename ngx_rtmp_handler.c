@@ -816,12 +816,11 @@ ngx_rtmp_set_chunk_size(ngx_rtmp_session_t *s, ngx_uint_t size)
     ngx_buf_t                          *bi, *bo;
     ngx_int_t                           n;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-        "setting chunk_size=%ui", size);
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "setting chunk_size=%ui", size);
 
+    // 10485760
     if (size > NGX_RTMP_MAX_CHUNK_SIZE) {
-        ngx_log_error(NGX_LOG_ALERT, s->connection->log, 0,
-                      "too big RTMP chunk size:%ui", size);
+        ngx_log_error(NGX_LOG_ALERT, s->connection->log, 0, "too big RTMP chunk size:%ui", size);
         return NGX_ERROR;
     }
 

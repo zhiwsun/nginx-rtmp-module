@@ -247,6 +247,7 @@ ngx_rtmp_free_handshake_buffers(ngx_rtmp_session_t *s)
 }
 
 
+// 创建 S0
 static ngx_int_t
 ngx_rtmp_handshake_create_challenge(ngx_rtmp_session_t *s, const u_char version[4], ngx_str_t *key)
 {
@@ -372,6 +373,7 @@ ngx_rtmp_handshake_recv(ngx_event_t *rev)
         return;
     }
 
+    // timeout
     if (rev->timedout) {
         ngx_log_error(NGX_LOG_INFO, c->log, NGX_ETIMEDOUT, "handshake: recv: client timed out");
         c->timedout = 1;
@@ -383,6 +385,7 @@ ngx_rtmp_handshake_recv(ngx_event_t *rev)
         ngx_del_timer(rev);
     }
 
+    // ngx_buf_t
     b = s->hs_buf;
 
     while (b->last != b->end) {
@@ -412,6 +415,8 @@ ngx_rtmp_handshake_recv(ngx_event_t *rev)
     ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handshake: stage %ui", s->hs_stage);
 
     switch (s->hs_stage) {
+
+        // stage == 2
         case NGX_RTMP_HANDSHAKE_SERVER_SEND_CHALLENGE:
             if (ngx_rtmp_handshake_parse_challenge(s, &ngx_rtmp_client_partial_key, &ngx_rtmp_server_full_key) != NGX_OK)
             {
@@ -419,6 +424,7 @@ ngx_rtmp_handshake_recv(ngx_event_t *rev)
                 ngx_rtmp_finalize_session(s);
                 return;
             }
+            // 兼容旧的握手协议
             if (s->hs_old) {
                 ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handshake: old-style challenge");
                 s->hs_buf->pos = s->hs_buf->start;
@@ -429,6 +435,7 @@ ngx_rtmp_handshake_recv(ngx_event_t *rev)
                 ngx_rtmp_finalize_session(s);
                 return;
             }
+            // 发送 S0
             ngx_rtmp_handshake_send(c->write);
             break;
 
@@ -515,6 +522,8 @@ ngx_rtmp_handshake_send(ngx_event_t *wev)
     ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handshake: stage %ui", s->hs_stage);
 
     switch (s->hs_stage) {
+
+        // stage == 3
         case NGX_RTMP_HANDSHAKE_SERVER_SEND_RESPONSE:
             if (s->hs_old) {
                 ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "handshake: old-style response");
@@ -559,7 +568,7 @@ ngx_rtmp_handshake(ngx_rtmp_session_t *s)
 
     s->hs_buf = ngx_rtmp_alloc_handshake_buffer(s);
 
-    // 握手协议状态机起始状态
+    // 握手协议状态机起始状态，stage = 1
     s->hs_stage = NGX_RTMP_HANDSHAKE_SERVER_RECV_CHALLENGE;
 
     ngx_rtmp_handshake_recv(c->read);

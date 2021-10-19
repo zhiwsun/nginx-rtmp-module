@@ -22,25 +22,17 @@ static ngx_rtmp_stream_begin_pt     next_stream_begin;
 static ngx_rtmp_stream_eof_pt       next_stream_eof;
 
 
-static char *ngx_rtmp_record_recorder(ngx_conf_t *cf, ngx_command_t *cmd,
-       void *conf);
+static char *ngx_rtmp_record_recorder(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_rtmp_record_postconfiguration(ngx_conf_t *cf);
 static void * ngx_rtmp_record_create_app_conf(ngx_conf_t *cf);
-static char * ngx_rtmp_record_merge_app_conf(ngx_conf_t *cf,
-       void *parent, void *child);
-static ngx_int_t ngx_rtmp_record_write_frame(ngx_rtmp_session_t *s,
-       ngx_rtmp_record_rec_ctx_t *rctx,
-       ngx_rtmp_header_t *h, ngx_chain_t *in, ngx_int_t inc_nframes);
-static ngx_int_t ngx_rtmp_record_av(ngx_rtmp_session_t *s,
-       ngx_rtmp_header_t *h, ngx_chain_t *in);
-static ngx_int_t ngx_rtmp_record_node_av(ngx_rtmp_session_t *s,
-       ngx_rtmp_record_rec_ctx_t *rctx, ngx_rtmp_header_t *h, ngx_chain_t *in);
-static ngx_int_t ngx_rtmp_record_node_open(ngx_rtmp_session_t *s,
-       ngx_rtmp_record_rec_ctx_t *rctx);
-static ngx_int_t ngx_rtmp_record_node_close(ngx_rtmp_session_t *s,
-       ngx_rtmp_record_rec_ctx_t *rctx);
-static void  ngx_rtmp_record_make_path(ngx_rtmp_session_t *s,
-       ngx_rtmp_record_rec_ctx_t *rctx, ngx_str_t *path);
+static char * ngx_rtmp_record_merge_app_conf(ngx_conf_t *cf, void *parent, void *child);
+
+static ngx_int_t ngx_rtmp_record_write_frame(ngx_rtmp_session_t *s, ngx_rtmp_record_rec_ctx_t *rctx, ngx_rtmp_header_t *h, ngx_chain_t *in, ngx_int_t inc_nframes);
+static ngx_int_t ngx_rtmp_record_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in);
+static ngx_int_t ngx_rtmp_record_node_av(ngx_rtmp_session_t *s, ngx_rtmp_record_rec_ctx_t *rctx, ngx_rtmp_header_t *h, ngx_chain_t *in);
+static ngx_int_t ngx_rtmp_record_node_open(ngx_rtmp_session_t *s, ngx_rtmp_record_rec_ctx_t *rctx);
+static ngx_int_t ngx_rtmp_record_node_close(ngx_rtmp_session_t *s, ngx_rtmp_record_rec_ctx_t *rctx);
+static void  ngx_rtmp_record_make_path(ngx_rtmp_session_t *s, ngx_rtmp_record_rec_ctx_t *rctx, ngx_str_t *path);
 static ngx_int_t ngx_rtmp_record_init(ngx_rtmp_session_t *s);
 
 
@@ -221,8 +213,7 @@ ngx_rtmp_record_merge_app_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_value(conf->append, prev->append, 0);
     ngx_conf_merge_value(conf->lock_file, prev->lock_file, 0);
     ngx_conf_merge_value(conf->notify, prev->notify, 0);
-    ngx_conf_merge_msec_value(conf->interval, prev->interval,
-                              (ngx_msec_t) NGX_CONF_UNSET);
+    ngx_conf_merge_msec_value(conf->interval, prev->interval, (ngx_msec_t) NGX_CONF_UNSET);
     ngx_conf_merge_bitmask_value(conf->flags, prev->flags, 0);
     ngx_conf_merge_ptr_value(conf->url, prev->url, NULL);
 
@@ -258,9 +249,7 @@ ngx_rtmp_record_write_header(ngx_file_t *file)
         0x00  /* PreviousTagSize0 (not actually a header) */
     };
 
-    return ngx_write_file(file, flv_header, sizeof(flv_header), 0) == NGX_ERROR
-           ? NGX_ERROR
-           : NGX_OK;
+    return ngx_write_file(file, flv_header, sizeof(flv_header), 0) == NGX_ERROR ? NGX_ERROR : NGX_OK;
 }
 
 
@@ -292,8 +281,7 @@ ngx_rtmp_record_open(ngx_rtmp_session_t *s, ngx_uint_t n, ngx_str_t *path)
     ngx_rtmp_record_rec_ctx_t      *rctx;
     ngx_int_t                       rc;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "record: #%ui manual open", n);
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "record: #%ui manual open", n);
 
     rctx = ngx_rtmp_record_get_node_ctx(s, n);
 
@@ -992,9 +980,9 @@ ngx_rtmp_record_get_chain_mlen(ngx_chain_t *in)
 }
 
 
+// 回调函数：事件 NGX_RTMP_MSG_AUDIO | NGX_RTMP_MSG_VIDEO
 static ngx_int_t
-ngx_rtmp_record_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
-                   ngx_chain_t *in)
+ngx_rtmp_record_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_rtmp_record_ctx_t          *ctx;
     ngx_rtmp_record_rec_ctx_t      *rctx;
@@ -1017,8 +1005,7 @@ ngx_rtmp_record_av(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h,
 
 
 static ngx_int_t
-ngx_rtmp_record_node_av(ngx_rtmp_session_t *s, ngx_rtmp_record_rec_ctx_t *rctx,
-                        ngx_rtmp_header_t *h, ngx_chain_t *in)
+ngx_rtmp_record_node_av(ngx_rtmp_session_t *s, ngx_rtmp_record_rec_ctx_t *rctx, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {
     ngx_time_t                      next;
     ngx_rtmp_header_t               ch;

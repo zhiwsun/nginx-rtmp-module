@@ -130,9 +130,9 @@ ngx_rtmp_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
      */
     modules = cf->cycle->modules;
 
-    // 回调函数：module[i]->ctx->create_main_conf
-    // 回调函数：module[i]->ctx->create_srv_conf
-    // 回调函数：module[i]->ctx->create_app_conf
+    // 回调函数：modules[i]->ctx->create_main_conf
+    // 回调函数：modules[i]->ctx->create_srv_conf
+    // 回调函数：modules[i]->ctx->create_app_conf
     for (m = 0; modules[m]; m++) {
         if (modules[m]->type != NGX_RTMP_MODULE) {
             continue;
@@ -378,7 +378,9 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
     ngx_hash_key_t             *ha;
     size_t                      n, m;
 
-    // RTMP标准协议事件，由 ngx_rtmp_protocol_message_handler 处理
+    // Protocol Control Messages
+    // csid = 2 & msid = 0 & type in [1,2,3,5,6]
+    // 回调函数：ngx_rtmp_protocol_message_handler
     static size_t               pm_events[] = {
         NGX_RTMP_MSG_CHUNK_SIZE,
         NGX_RTMP_MSG_ABORT,
@@ -387,7 +389,9 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
         NGX_RTMP_MSG_BANDWIDTH
     };
 
-    // AMF消息事件，由 ngx_rtmp_amf_message_handler 处理
+    // RTMP Command Messages
+    // type in [15,16,17,18,19,20]
+    // 回调函数：ngx_rtmp_amf_message_handler
     static size_t               amf_events[] = {
         NGX_RTMP_MSG_AMF_CMD,
         NGX_RTMP_MSG_AMF_META,
@@ -397,19 +401,20 @@ ngx_rtmp_init_event_handlers(ngx_conf_t *cf, ngx_rtmp_core_main_conf_t *cmcf)
         NGX_RTMP_MSG_AMF3_SHARED
     };
 
-    /* init standard protocol events */
+    // 初始化回调函数
     for(n = 0; n < sizeof(pm_events) / sizeof(pm_events[0]); ++n) {
         eh = ngx_array_push(&cmcf->events[pm_events[n]]);
         *eh = ngx_rtmp_protocol_message_handler;
     }
-
-    /* init amf events */
+    // 初始化回调函数
     for(n = 0; n < sizeof(amf_events) / sizeof(amf_events[0]); ++n) {
         eh = ngx_array_push(&cmcf->events[amf_events[n]]);
         *eh = ngx_rtmp_amf_message_handler;
     }
 
-    /* init user protocol events */
+    // User Control Mesages
+    // csid == 2 && msid == 0 && type == 4
+    // 回调函数：ngx_rtmp_user_message_handler
     eh = ngx_array_push(&cmcf->events[NGX_RTMP_MSG_USER]);
     *eh = ngx_rtmp_user_message_handler;
 
@@ -575,7 +580,7 @@ ngx_rtmp_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
 
             ls->addr_ntop = 1;
 
-            // listening->handler 回调函数，后续请求的处理器
+            // 回调函数：listening->handler，这里监听的是 ngx_event_t，后续处理请求就流转到 rtmp_module
             ls->handler = ngx_rtmp_init_connection;
             ls->pool_size = 4096;
 
@@ -736,7 +741,7 @@ ngx_rtmp_cmp_conf_addrs(const void *one, const void *two)
 }
 
 
-// 触发一个evt事件，执行各个对应event的回调函数，回调函数是一个数组
+// 触发一个evt事件，执行各个对应event的回调函数
 ngx_int_t
 ngx_rtmp_fire_event(ngx_rtmp_session_t *s, ngx_uint_t evt, ngx_rtmp_header_t *h, ngx_chain_t *in)
 {

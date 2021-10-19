@@ -32,7 +32,19 @@ static ngx_int_t ngx_rtmp_cmd_recorded(ngx_rtmp_session_t *s, ngx_rtmp_recorded_
 static ngx_int_t ngx_rtmp_cmd_set_buflen(ngx_rtmp_session_t *s, ngx_rtmp_set_buflen_t *v);
 
 
-// 这里定义的是RTMP控制指令的回调函数，函数指针；在postconfiguration回调函数中赋值
+// 注意这些函数指针的初始化过程！
+// 1. cmd_module中定义的是全局变量，初始化赋值了cmd_module中对应的函数指针；
+// 2. 在各其他module中有定义对应类型的next_xxx静态局部变量，和当前的全局变量构造成一个线性调用链
+//    static ngx_rtmp_connect_pt next_connect;      // 静态变量，只在module内部可见
+//    next_connect = ngx_rtmp_connect;              // 全局变量赋值给静态变量
+//    ngx_rtmp_connect = ngx_rtmp_notify_connect;   // 把当前module的处理函数赋值给全局函数指针
+//    return next_connect(s, v);                    // 最后执行静态变量对应的函数指针
+// 3. 这样的处理方式实质上就是构建了一个逆向的调用链表，在postconfiguration方法中后赋值处理的方法会率先调用；
+//    而在当前module中赋值的函数也无法知晓在哪个节点会执行。
+//
+// 这样的设计很不人性化
+// 1. 函数链的调用顺序依靠module加载的顺序，module的index
+
 ngx_rtmp_connect_pt         ngx_rtmp_connect;
 ngx_rtmp_disconnect_pt      ngx_rtmp_disconnect;
 ngx_rtmp_create_stream_pt   ngx_rtmp_create_stream;
@@ -42,7 +54,6 @@ ngx_rtmp_publish_pt         ngx_rtmp_publish;
 ngx_rtmp_play_pt            ngx_rtmp_play;
 ngx_rtmp_seek_pt            ngx_rtmp_seek;
 ngx_rtmp_pause_pt           ngx_rtmp_pause;
-
 
 ngx_rtmp_stream_begin_pt    ngx_rtmp_stream_begin;
 ngx_rtmp_stream_eof_pt      ngx_rtmp_stream_eof;
@@ -779,19 +790,16 @@ ngx_rtmp_cmd_postconfiguration(ngx_conf_t *cf)
 
     cmcf = ngx_rtmp_conf_get_module_main_conf(cf, ngx_rtmp_core_module);
 
-    /*
-     * redirect disconnects to deleteStream to free client modules
-     * from registering disconnect callback
-     */
 
+    // 回调函数：NGX_RTMP_DISCONNECT
     h = ngx_array_push(&cmcf->events[NGX_RTMP_DISCONNECT]);
     if (h == NULL) {
         return NGX_ERROR;
     }
-
     *h = ngx_rtmp_cmd_disconnect_init;
 
-    /* 注册AMF的回调函数，回调函数存在cmcf->amf中 */
+
+    // 注册AMF指令的的回调函数（存在cmcf->amf动态数组中），包括 NetConnection 和 NetStream 指令
     ncalls = sizeof(ngx_rtmp_cmd_map) / sizeof(ngx_rtmp_cmd_map[0]);
     ch = ngx_array_push_n(&cmcf->amf, ncalls);
     if (ch == NULL) {
@@ -802,7 +810,6 @@ ngx_rtmp_cmd_postconfiguration(ngx_conf_t *cf)
         *ch = *bh;
     }
 
-    // 给各个函数指针赋值，则真实调用的方法是cmd_xxx
     ngx_rtmp_connect = ngx_rtmp_cmd_connect;
     ngx_rtmp_disconnect = ngx_rtmp_cmd_disconnect;
     ngx_rtmp_create_stream = ngx_rtmp_cmd_create_stream;

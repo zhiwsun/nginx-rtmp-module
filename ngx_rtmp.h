@@ -282,11 +282,14 @@ typedef struct {
 typedef struct {
     ngx_array_t             servers;    /* ngx_rtmp_core_srv_conf_t */
     ngx_array_t             listen;     /* ngx_rtmp_listen_t */
-    // events[26]
+
+    // events[26] 下标是事件 evt，对应的动态数组 ngx_array_t[evt] 是处理函数链表
+    // 事件 evt 对应 ngx_rtmp_header_t->type，是RTMP协议中头部 MessageHeader的message_type字段
     ngx_array_t             events[NGX_RTMP_MAX_EVENT];
 
     ngx_hash_t              amf_hash;
     ngx_array_t             amf_arrays;
+
     // ngx_rtmp_amf_handler_t - AMF消息指令的回调函数列表
     ngx_array_t             amf;
 } ngx_rtmp_core_main_conf_t;
