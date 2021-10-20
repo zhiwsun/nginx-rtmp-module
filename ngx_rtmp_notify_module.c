@@ -1331,8 +1331,7 @@ ngx_rtmp_notify_disconnect(ngx_rtmp_session_t *s)
         goto next;
     }
 
-    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                  "notify: disconnect '%V'", &url->url);
+    ngx_log_error(NGX_LOG_INFO, s->connection->log, 0, "notify: disconnect '%V'", &url->url);
 
     ngx_memzero(&ci, sizeof(ci));
 

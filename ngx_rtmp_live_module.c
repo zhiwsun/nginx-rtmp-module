@@ -569,13 +569,11 @@ ngx_rtmp_live_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v)
     }
 
     if (ctx->stream == NULL) {
-        ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                       "live: not joined");
+        ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "live: not joined");
         goto next;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "live: leave '%s'", ctx->stream->name);
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "live: leave '%s'", ctx->stream->name);
 
     if (ctx->stream->publishing && ctx->publishing) {
         ctx->stream->publishing = 0;
@@ -593,14 +591,12 @@ ngx_rtmp_live_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v)
     }
 
     if (ctx->publishing) {
-        ngx_rtmp_send_status(s, "NetStream.Unpublish.Success",
-                             "status", "Stop publishing");
+        ngx_rtmp_send_status(s, "NetStream.Unpublish.Success", "status", "Stop publishing");
         if (!lacf->idle_streams) {
             for (pctx = ctx->stream->ctx; pctx; pctx = pctx->next) {
                 if (pctx->publishing == 0) {
                     ss = pctx->session;
-                    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, ss->connection->log, 0,
-                                   "live: no publisher");
+                    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, ss->connection->log, 0, "live: no publisher");
                     ngx_rtmp_finalize_session(ss);
                 }
             }
@@ -612,9 +608,7 @@ ngx_rtmp_live_close_stream(ngx_rtmp_session_t *s, ngx_rtmp_close_stream_t *v)
         goto next;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "live: delete empty stream '%s'",
-                   ctx->stream->name);
+    ngx_log_debug1(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "live: delete empty stream '%s'", ctx->stream->name);
 
     stream = ngx_rtmp_live_get_stream(s, ctx->stream->name, 0);
     if (stream == NULL) {

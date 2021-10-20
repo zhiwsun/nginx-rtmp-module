@@ -38,10 +38,15 @@
                                         |NGX_RTMP_AMF_TYPELESS)
 
 
+// 从AMF消息中解码出来的消息存储
 typedef struct {
+    // 消息类型
     ngx_int_t                           type;
+    // 消息名称
     ngx_str_t                           name;
+    // 消息数据
     void                               *data;
+    // 消息数据长度
     size_t                              len;
 } ngx_rtmp_amf_elt_t;
 
@@ -50,6 +55,7 @@ typedef ngx_chain_t * (*ngx_rtmp_amf_alloc_pt)(void *arg);
 
 
 typedef struct {
+    // link指向保存着接收到的数据的 ngx_chain_t 结构体 in 首地址
     ngx_chain_t                        *link, *first;
     size_t                              offset;
     ngx_rtmp_amf_alloc_pt               alloc;

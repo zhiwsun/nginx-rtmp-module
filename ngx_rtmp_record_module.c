@@ -677,8 +677,7 @@ ngx_rtmp_record_stop(ngx_rtmp_session_t *s)
         return;
     }
 
-    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "record: stop");
+    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "record: stop");
 
     rctx = ctx->rec.elts;
     for (n = 0; n < ctx->rec.nelts; ++n, ++rctx) {
@@ -846,8 +845,7 @@ ngx_rtmp_record_close_stream(ngx_rtmp_session_t *s,
         goto next;
     }
 
-    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0,
-                   "record: close_stream");
+    ngx_log_debug0(NGX_LOG_DEBUG_RTMP, s->connection->log, 0, "record: close_stream");
 
     ngx_rtmp_record_stop(s);
 
