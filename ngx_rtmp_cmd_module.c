@@ -489,8 +489,8 @@ ngx_rtmp_cmd_publish_init(ngx_rtmp_session_t *s, ngx_rtmp_header_t *h, ngx_chain
     ngx_rtmp_cmd_fill_args(v.name, v.args);
 
     ngx_log_error(NGX_LOG_INFO, s->connection->log, 0,
-                  "publish: name='%s' args='%s' type=%s silent=%d",
-                  v.name, v.args, v.type, v.silent);
+                  "publish: name='%s' args='%s' type=%s silent=%d, maxArgsLen=%d",
+                  v.name, v.args, v.type, v.silent, NGX_RTMP_MAX_ARGS);
 
     return ngx_rtmp_publish(s, &v);
 }
