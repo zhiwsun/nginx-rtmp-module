@@ -34,9 +34,16 @@ typedef struct {
 
     unsigned                bind:1;
     unsigned                wildcard:1;
+#if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
+    unsigned                ipv6only:2;
+#endif
     unsigned                so_keepalive:2;
     unsigned                proxy_protocol:1;
-    unsigned                ipv6only:2;
+#if (NGX_HAVE_KEEPALIVE_TUNABLE)
+    int                     tcp_keepidle;
+    int                     tcp_keepintvl;
+    int                     tcp_keepcnt;
+#endif
 } ngx_rtmp_listen_t;
 
 
@@ -76,13 +83,21 @@ typedef struct {
 typedef struct {
     struct sockaddr        *sockaddr;
     socklen_t               socklen;
+
     ngx_rtmp_conf_ctx_t    *ctx;
 
     unsigned                bind:1;
     unsigned                wildcard:1;
+#if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
+    unsigned                ipv6only:2;
+#endif
     unsigned                so_keepalive:2;
     unsigned                proxy_protocol:1;
-    unsigned                ipv6only:2;
+#if (NGX_HAVE_KEEPALIVE_TUNABLE)
+    int                     tcp_keepidle;
+    int                     tcp_keepintvl;
+    int                     tcp_keepcnt;
+#endif
 } ngx_rtmp_conf_addr_t;
 
 
